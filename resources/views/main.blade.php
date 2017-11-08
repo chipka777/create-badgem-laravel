@@ -4,10 +4,10 @@
     <div id="app">
         <div class="main">
             <div class="menu-element menu-category file-btn-search"></div>
-            <div class="menu-element menu-left prev" page-value="1"></div>
+            <div class="menu-element menu-left prev" page-value="1" @click="spiralLeft"></div>
             <div class="menu-element menu-instagram"  onclick="getInsta()"></div>
             <div class="menu-element menu-members" onclick="showMain('login')"></div>
-            <div class="menu-element menu-right next" page-value="1"></div>
+            <div class="menu-element menu-right next" page-value="1" @click="spiralRight"></div>
             <div class="menu-element menu-bitcoin" onclick="showMain('bitcoin')"></div>
 
             <div class="menu-center">
@@ -21,11 +21,10 @@
 
                 <div id="cat-search" class="category-search" data-prev='0'>
                     <h3>Category Search !</h3>
-                    <select name="searchCate" onchange="searchCate(this.value)">
-                        <option value="">Select Category</option>
-                        @foreach($categories as $category)
-                            <option value='{{ $category->name }}'>{{ $category->name }}</option>
-                        @endforeach
+                    <select name="searchCate" @change="getImages($event.target.value)">
+                        <option value="0">Select Category</option>
+                        <option :value='category.id' v-for='category in categories'>@{{ category.name }}</option>
+ 
                     </select>
                 </div>
 
@@ -57,11 +56,9 @@
             </div>
         </div>
         <div class="panels">
-            @foreach($images as $key => $image)
-                <div id='img-{{ $image->id }}' class='panel pos{{ $key+1 }} canva-img'>
-                    <img onmousedown='panelImg(event, $(this))' src='upload/{{ $image->name }}' />
-                </div>
-            @endforeach
+            <div :id='"img-"+image.id' :class='"panel pos"+(key+1)+" canva-img"' v-for='(image, key) in images' :data-pos='(key+1)'>
+                <img onmousedown='panelImg(event, $(this))' :src='"upload/" + image.name' />
+            </div>
         </div>
         <example></example>
     </div>

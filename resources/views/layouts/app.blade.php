@@ -10,6 +10,10 @@
         <script src="https://use.fontawesome.com/03eca4d1ce.js"></script>
         <script src="{{ asset('js/custom.js') }}" type="text/javascript"></script>
         <script src="{{ asset('js/canvas.js') }}" type="text/javascript"></script>
+        <script
+            src="https://code.jquery.com/jquery-3.2.1.min.js"
+            integrity="sha256-hwg4gsxgFZhOsEEamdOYGBf13FyQuiTwlAQgxVSNgt4="
+            crossorigin="anonymous"></script>
 
         <meta name="csrf-token" content="{{ csrf_token() }}">
     </head>

@@ -312,7 +312,7 @@ width: 28%;
     width: 29%;
     height: 33%;
     transition: .5s all ease;
-    display: table-cell;
+    display: none;
     /* overflow: hidden; */
     border-radius: 20px;
     vertical-align: middle;
@@ -378,7 +378,7 @@ width: 28%;
 	background-size: contain;
     background-repeat: no-repeat;
 	position: absolute;
-	top: 31%;
+	top: 28%;
 	left: 36%;
 	width: 25%;
 	margin: -1%;
@@ -800,44 +800,54 @@ width: 28%;
 
 
 .pos0 {
-	top: 33%;
+	display: table-cell;
+	top: 66%;
 	left: 100%;
 }
 .pos1 {
-	top: 30%;
+	display: table-cell;
+	top: 66%;
 	left: 72%;
 }
 .pos2 {
-	top: -9%;
-	left: 72%;
-}
-.pos3 {
-	top: -9%;
+	display: table-cell;
+	top: 66%;
 	left: 33%;
 }
-.pos4 {
-	top: -9%;
+.pos3 {
+	display: table-cell;
+	top: 66%;
 	left: -5%;
 }
-.pos5 {
+.pos4 {
+	display: table-cell;
 	top: 30%;
 	left: -5%;
 }
-.pos6 {
-	top: 66%;
+.pos5 {
+	display: table-cell;
+	top: -9%;
 	left: -5%;
 }
-.pos7 {
-	top: 66%;
+.pos6 {
+	display: table-cell;
+	top: -9%;
 	left: 33%;
 }
+.pos7 {
+	display: table-cell;
+	top: -9%;
+	left: 72%;
+}
 .pos8 {
-	top: 66%;
+	display: table-cell;
+	top: 30%;
 	left: 72%;
 }
 .pos9 {
-	left: 100%;
-	top: 66%;
+	display: table-cell;
+	left: 72%;
+	top: 100%;
 }
 /*
 .prev {
