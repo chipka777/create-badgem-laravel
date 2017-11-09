@@ -28,6 +28,8 @@ const app = new Vue({
         offset: 0,
         flag: 0,
         spiral: 0,
+        insta: 0,
+        counter: 0,
     },
     beforeMount: function() {
         this.getCategories();
@@ -43,8 +45,11 @@ const app = new Vue({
         },
 
         getImages: function(cat_id = 'all', count = 20) {
+
             if (cat_id == '0') cat_id = 'all';
+
             this.$http.get('/api/v1/images/' + cat_id + '/' + count + '/0').then(response => {
+
                 this.images = response.data;
                 this.offset = 20;
             }, response => {
@@ -52,15 +57,33 @@ const app = new Vue({
             });
         },
 
+        getInstaImages: function () {
+            this.$http.get('/api/v1/images/instagram').then(response => {
+                this.insta = 1;
+                this.images = response.data;
+                this.offset = 20;
+
+            }, response => {
+                alert('Some error with instagram images api!');
+            });
+        },
+
         setImageToPanels: function(last, cat_id = 'all') {
             if (this.flag) return false;
             this.flag = 1;
             this.$http.get('/api/v1/images/' + cat_id + '/10/' + this.offset).then(response => {
+                
                 this.offset += 10;
-                images = response.data;
-                for (var i = 0; i < images.length; i++) {
-                    $('.panels').append('<div id="img-'+images[i].id+'" data-pos="'+(last+i+1)+'" class="panel canva-img test pos'+(last+i+1)+'"><img onmousedown="panelImg(event, $(this))" src="upload/'+images[i].name+'"></div>');
+                images =  this.images.concat(response.data);
+                ln = images.length;
+                for (var i = 0; i < ln; i++) {
+                    images[i].num = i+1;
                 }
+
+                this.images = images;
+               /* for (var i = 0; i < images.length; i++) {
+                    $('.panels').append('<div id="img-'+images[i].id+'" data-pos="'+(last+i+1)+'" class="panel canva-img test pos'+(last+i+1)+'"><img onmousedown="panelImg(event, $(this))" src="upload/'+images[i].name+'"></div>');
+                }*/
                 this.flag = 0;
             }, response => {
                 alert('Some error with images api!');
@@ -74,22 +97,37 @@ const app = new Vue({
             if (cat_id == '0') cat_id = 'all';
             if (last < 19 && !this.flag) this.setImageToPanels(last + 1, cat_id);
             if (this.flag) return false;
-            $('.panels').children().each(function() {
+            ln = this.images.length;
+            images = this.images;
+            for(var i = 0; i < ln; i++) {
+                images[i].num -= 1;
+            }
+            this.images = images;
+            /*$('.panels').children().each(function() {
                 pos = Number($(this).attr('data-pos'));
+                $(this).children('img').attr('data-pos', pos-1);
                 $(this).attr('data-pos', pos-1).removeClass('pos'+pos).addClass('pos'+ (pos-1));
+
                 this.flag = 1;
-            });
+            });*/
             this.flag = 0;
         },
 
         spiralLeft: function() {
             first = Number($('.panels div:first-child').attr('data-pos'));
             if (first < 1) {
+                ln = this.images.length;
+                images = this.images;
+                for(var i = 0; i < ln; i++) {
+                    images[i].num += 1;
+                }
+                this.images = images;
+                /*
                 $('.panels').children().each(function() {
                     pos = Number($(this).attr('data-pos'));
 
                     $(this).attr('data-pos', pos+1).removeClass('pos'+pos).addClass('pos'+ (pos+1));
-                });
+                });*/
             }
         },
 

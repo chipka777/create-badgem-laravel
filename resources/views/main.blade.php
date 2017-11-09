@@ -5,7 +5,7 @@
         <div class="main">
             <div class="menu-element menu-category file-btn-search"></div>
             <div class="menu-element menu-left prev" page-value="1" @click="spiralLeft"></div>
-            <div class="menu-element menu-instagram"  onclick="getInsta()"></div>
+            <div class="menu-element menu-instagram"  @click="getInstaImages"></div>
             <div class="menu-element menu-members" onclick="showMain('login')"></div>
             <div class="menu-element menu-right next" page-value="1" @click="spiralRight"></div>
             <div class="menu-element menu-bitcoin" onclick="showMain('bitcoin')"></div>
@@ -56,8 +56,9 @@
             </div>
         </div>
         <div class="panels">
-            <div :id='"img-"+image.id' :class='"panel pos"+(key+1)+" canva-img"' v-for='(image, key) in images' :data-pos='(key+1)'>
-                <img onmousedown='panelImg(event, $(this))' :src='"upload/" + image.name' />
+            <div :id='"img-"+image.id' :class='"panel pos"+image.num+" canva-img"' v-for='(image, key) in images' :data-pos="image.num">
+                <img onmousedown='panelImg(event, $(this))' :src='"upload/" + image.name' v-if="!image.insta" :data-pos="image.num"/>
+                <img onmousedown='panelImg(event, $(this))' :src='image.name' v-else :data-pos="image.num"/>
             </div>
         </div>
         <example></example>
