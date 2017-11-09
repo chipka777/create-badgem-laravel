@@ -21,7 +21,7 @@
 
                 <div id="cat-search" class="category-search" data-prev='0'>
                     <h3>Category Search !</h3>
-                    <select name="searchCate" @change="getImages($event.target.value)">
+                    <select id="select-cat" name="searchCate" @change="getImages($event.target.value)">
                         <option value="0">Select Category</option>
                         <option :value='category.id' v-for='category in categories'>@{{ category.name }}</option>
  

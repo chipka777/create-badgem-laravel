@@ -27,6 +27,7 @@ const app = new Vue({
         images: [],
         offset: 0,
         flag: 0,
+        spiral: 0,
     },
     beforeMount: function() {
         this.getCategories();
@@ -41,26 +42,27 @@ const app = new Vue({
             });
         },
 
-        getImages: function(cat_id = 0, count = 20) {
+        getImages: function(cat_id = 'all', count = 20) {
+            if (cat_id == '0') cat_id = 'all';
             this.$http.get('/api/v1/images/' + cat_id + '/' + count + '/0').then(response => {
                 this.images = response.data;
-                this.offset += 20;
+                this.offset = 20;
             }, response => {
                 alert('Some error with images api!');
             });
         },
 
-        setImageToPanels: function(last, cat_id = 0) {
+        setImageToPanels: function(last, cat_id = 'all') {
+            if (this.flag) return false;
             this.flag = 1;
             this.$http.get('/api/v1/images/' + cat_id + '/10/' + this.offset).then(response => {
-                this.flag = 0;
                 this.offset += 10;
                 images = response.data;
                 for (var i = 0; i < images.length; i++) {
-                    $('.panels').append('<div id="img-'+images[i].id+'" data-pos="'+(last+i+1)+'" class="panel canva-img pos'+(last+i+1)+'"><img onmousedown="panelImg(event, $(this))" src="upload/'+images[i].name+'"></div>');
+                    $('.panels').append('<div id="img-'+images[i].id+'" data-pos="'+(last+i+1)+'" class="panel canva-img test pos'+(last+i+1)+'"><img onmousedown="panelImg(event, $(this))" src="upload/'+images[i].name+'"></div>');
                 }
+                this.flag = 0;
             }, response => {
-                
                 alert('Some error with images api!');
             });
         },
@@ -68,12 +70,12 @@ const app = new Vue({
         spiralRight: function() {
             last = Number($('.panels div:last-child').attr('data-pos')) - 1;
             self = this;
-            
-            if (last < 19 && !this.flag) this.setImageToPanels(last);
-            if (this.flag) return false 
+            cat_id = $('#select-cat').val();
+            if (cat_id == '0') cat_id = 'all';
+            if (last < 19 && !this.flag) this.setImageToPanels(last + 1, cat_id);
+            if (this.flag) return false;
             $('.panels').children().each(function() {
                 pos = Number($(this).attr('data-pos'));
-             
                 $(this).attr('data-pos', pos-1).removeClass('pos'+pos).addClass('pos'+ (pos-1));
                 this.flag = 1;
             });
@@ -85,13 +87,7 @@ const app = new Vue({
             if (first < 1) {
                 $('.panels').children().each(function() {
                     pos = Number($(this).attr('data-pos'));
-                    
-                    
-                    /*
-                    if (last > 1 && use) {
-                        use = false;
-                        self.setImageToPanels(last);
-                    }*/
+
                     $(this).attr('data-pos', pos+1).removeClass('pos'+pos).addClass('pos'+ (pos+1));
                 });
             }

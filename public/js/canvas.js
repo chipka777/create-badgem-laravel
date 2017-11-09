@@ -110,7 +110,7 @@ function panelImg(e,elem) {
                 canvasImg();
             }
              
-            obj.css({'transition-duration': '0.5s', top: top_per + '%', left: left_per + '%', 'z-index': 1});
+            obj.attr('style', '');
             showMain(prev);
             $(document).off("mouseup");
             
