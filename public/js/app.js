@@ -188,17 +188,23 @@ var app = new Vue({
             this.$http.get('/api/v1/images/' + cat_id + '/10/' + this.offset).then(function (response) {
 
                 _this4.offset += 10;
-                images = _this4.images.concat(response.data);
+                //images =  this.images.concat(response.data);
+                images = response.data;
+                last_num = _this4.images[_this4.images.length - 1].num;
+
                 ln = images.length;
                 for (var i = 0; i < ln; i++) {
-                    images[i].num = i + 1;
+                    ++last_num;
+                    images[i].num = last_num;
                 }
+                images = _this4.images.concat(images);
 
                 _this4.images = images;
                 /* for (var i = 0; i < images.length; i++) {
                      $('.panels').append('<div id="img-'+images[i].id+'" data-pos="'+(last+i+1)+'" class="panel canva-img test pos'+(last+i+1)+'"><img onmousedown="panelImg(event, $(this))" src="upload/'+images[i].name+'"></div>');
                  }*/
                 _this4.flag = 0;
+                _this4.spiralRight();
             }, function (response) {
                 alert('Some error with images api!');
             });
@@ -221,7 +227,7 @@ var app = new Vue({
                 pos = Number($(this).attr('data-pos'));
                 $(this).children('img').attr('data-pos', pos-1);
                 $(this).attr('data-pos', pos-1).removeClass('pos'+pos).addClass('pos'+ (pos-1));
-                  this.flag = 1;
+                 this.flag = 1;
             });*/
             this.flag = 0;
         },
@@ -238,9 +244,32 @@ var app = new Vue({
                 /*
                 $('.panels').children().each(function() {
                     pos = Number($(this).attr('data-pos'));
-                      $(this).attr('data-pos', pos+1).removeClass('pos'+pos).addClass('pos'+ (pos+1));
+                     $(this).attr('data-pos', pos+1).removeClass('pos'+pos).addClass('pos'+ (pos+1));
                 });*/
             }
+        },
+
+        savePNG: function savePNG() {
+            html = '';
+            images = [];
+            $('.canvas>.canva-img').each(function (num, item) {
+                image = {
+                    'height': Math.round($(this).height() / $(this).parent().height() * 100) * 768 / 100,
+                    'width': Math.round($(this).width() / $(this).parent().width() * 100) * 1152 / 100,
+                    'rotate': getRotationDegrees($(this)),
+                    'src': $(this).children('img').attr('src'),
+                    'top': Math.round(Number($(this).css('top').slice(0, -2)) / $(this).parent().height() * 100) * 768 / 100,
+                    'left': Math.round(Number($(this).css('left').slice(0, -2)) / $(this).parent().width() * 100) * 1152 / 100
+                };
+
+                images[num] = image;
+            });
+
+            this.$http.post('/api/v1/images/create', { 'images': images }).then(function (response) {
+                window.location.replace("http://badgem.app/download");
+            }, function (response) {
+                alert('Some error with images api!');
+            });
         }
 
     }
@@ -23181,7 +23210,7 @@ var Component = normalizeComponent(
   __vue_scopeId__,
   __vue_module_identifier__
 )
-Component.options.__file = "resources\\assets\\js\\components\\Example.vue"
+Component.options.__file = "resources/assets/js/components/Example.vue"
 if (Component.esModule && Object.keys(Component.esModule).some(function (key) {  return key !== "default" && key.substr(0, 2) !== "__"})) {  console.error("named exports are not supported in *.vue files.")}
 
 /* hot reload */
@@ -23191,9 +23220,9 @@ if (false) {(function () {
   if (!hotAPI.compatible) return
   module.hot.accept()
   if (!module.hot.data) {
-    hotAPI.createRecord("data-v-b6ebd97a", Component.options)
+    hotAPI.createRecord("data-v-650f2efa", Component.options)
   } else {
-    hotAPI.reload("data-v-b6ebd97a", Component.options)
+    hotAPI.reload("data-v-650f2efa", Component.options)
 ' + '  }
   module.hot.dispose(function (data) {
     disposed = true
@@ -23380,7 +23409,7 @@ module.exports = { render: render, staticRenderFns: staticRenderFns }
 if (false) {
   module.hot.accept()
   if (module.hot.data) {
-    require("vue-hot-reload-api")      .rerender("data-v-b6ebd97a", module.exports)
+    require("vue-hot-reload-api")      .rerender("data-v-650f2efa", module.exports)
   }
 }
 

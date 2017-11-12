@@ -76,4 +76,32 @@ class ImagesController extends Controller
         curl_close( $connection_c );
         return json_decode( $json_return );
     }
+    
+    public function createBadgemImage(Request $request)
+    {
+        $tmps = [];
+
+        $cmd = "convert -size 1152x768 xc:white Badge.png \n "; 
+
+        foreach ($request->images as $key => $image) {
+            echo $image['src'];
+            if (stristr($image['src'], 'http')) {
+                copy($image['src'], "tmp_main_" . $image['width'] . $key . ".png");
+                $image['src'] = "tmp_main_" . $image['width'] . $key . ".png";
+                $tmps[] = "tmp_main_" . $image['width'] . $key . ".png";
+            }
+            exec("convert -resize " . $image['width'] . "x " . $image['src'] . " " . "tmp_" . $image['width'] . $key . ".png");
+            $str = "composite -geometry +" . $image['left'] . "+" . $image['top'] . 
+                    " -rotate " . $image['rotate'] . " " . "tmp_" . $image['width'] . $key . ".png" . " Badge.png Badge.png \n ";
+            $cmd .= $str;
+
+            $tmps[] = "tmp_" . $image['width'] . $key . ".png";
+        }
+
+        exec($cmd);
+
+        foreach($tmps as $tmp) {
+            exec("rm $tmp");
+        }
+}
 }

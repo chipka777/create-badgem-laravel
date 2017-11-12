@@ -16,5 +16,6 @@ Route::group(['namespace' => 'API', 'prefix' => 'v1'], function() {
     Route::get('categories', 'CategoriesController@getAll');
     Route::get('images/{category_id}/{count}/{offset}', 'ImagesController@getImagesByCount');
     Route::get('images/instagram', 'ImagesController@getImagesFromInstagram');
+    Route::post('images/create', 'ImagesController@createBadgemImage');
 });
 

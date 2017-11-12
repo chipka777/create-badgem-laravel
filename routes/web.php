@@ -12,3 +12,9 @@
 */
 
 Route::get('/', 'MainController@index');
+
+Auth::routes();
+
+Route::get('/dashboard', 'AdminController@index')->name('admin');
+
+Route::get('/download', 'DownloadController@getBadgem');
