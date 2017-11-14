@@ -266,7 +266,7 @@ var app = new Vue({
             });
 
             this.$http.post('/api/v1/images/create', { 'images': images }).then(function (response) {
-                window.location.replace("http://badgem.app/download");
+                window.location.replace("http://create.badge-m.com/download");
             }, function (response) {
                 alert('Some error with images api!');
             });
