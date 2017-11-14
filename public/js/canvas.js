@@ -272,7 +272,7 @@ function resizeImg(e, elem) {
             top_o = obj.position().top; 
             left_o = obj.position().left;           
 
-            if ( (res_y + top_o) < canvas_h && (res_x + left_o) < canvas_w ) obj.css({width: res_x, height: res_y});
+            if ( (res_y + top_o) < canvas_h && (res_x + left_o) < canvas_w ) obj.css({width: res_x});
            
         });
         $(document).on('mouseup', function() {
@@ -319,34 +319,14 @@ function savePDF() {
         };
         
         images[num] = image;
-
-        //html += '<div style="position:absolute;border: 1px solid #d4cfcf;' + h + w + rotate + top_d + left_d + '"> <img src="' + src + '" style="width:100%;height:100%;"/></div>';
     });
 
-   /*   var req = new XMLHttpRequest();
-    req.open("POST", "download.php", true);
-    req.responseType = "blob";
-    req.setRequestHeader("Content-type","application/x-www-form-urlencoded");
-    req.onreadystatechange = function () {
-        if (req.readyState === 4 && req.status === 200) {
-            
-            var blob = req.response;
-            var link = document.createElement('a');
-            link.href = window.URL.createObjectURL(blob);
-            link.download = "Badge-" + new Date().getTime() + ".pdf";
-            link.click();
-           
-        }
-    };
-
-    req.send(images);*/
     $.ajax({
 	    type: 'POST',
 	    url: 'download_new.php',
 	    data: { images: images},
 		success: function(data, status)
 	    {
-
             window.location.replace("http://create.badge-m.com/down.php");
 		},
 		error: function(data, status)

@@ -227,7 +227,7 @@ var app = new Vue({
                 pos = Number($(this).attr('data-pos'));
                 $(this).children('img').attr('data-pos', pos-1);
                 $(this).attr('data-pos', pos-1).removeClass('pos'+pos).addClass('pos'+ (pos-1));
-                 this.flag = 1;
+                  this.flag = 1;
             });*/
             this.flag = 0;
         },
@@ -244,7 +244,7 @@ var app = new Vue({
                 /*
                 $('.panels').children().each(function() {
                     pos = Number($(this).attr('data-pos'));
-                     $(this).attr('data-pos', pos+1).removeClass('pos'+pos).addClass('pos'+ (pos+1));
+                      $(this).attr('data-pos', pos+1).removeClass('pos'+pos).addClass('pos'+ (pos+1));
                 });*/
             }
         },
@@ -266,7 +266,7 @@ var app = new Vue({
             });
 
             this.$http.post('/api/v1/images/create', { 'images': images }).then(function (response) {
-                window.location.replace("http://create.badge-m.com/download");
+                window.location.replace("http://localhost:81/download");
             }, function (response) {
                 alert('Some error with images api!');
             });
@@ -23210,7 +23210,7 @@ var Component = normalizeComponent(
   __vue_scopeId__,
   __vue_module_identifier__
 )
-Component.options.__file = "resources/assets/js/components/Example.vue"
+Component.options.__file = "resources\\assets\\js\\components\\Example.vue"
 if (Component.esModule && Object.keys(Component.esModule).some(function (key) {  return key !== "default" && key.substr(0, 2) !== "__"})) {  console.error("named exports are not supported in *.vue files.")}
 
 /* hot reload */
@@ -23220,9 +23220,9 @@ if (false) {(function () {
   if (!hotAPI.compatible) return
   module.hot.accept()
   if (!module.hot.data) {
-    hotAPI.createRecord("data-v-650f2efa", Component.options)
+    hotAPI.createRecord("data-v-b6ebd97a", Component.options)
   } else {
-    hotAPI.reload("data-v-650f2efa", Component.options)
+    hotAPI.reload("data-v-b6ebd97a", Component.options)
 ' + '  }
   module.hot.dispose(function (data) {
     disposed = true
@@ -23409,7 +23409,7 @@ module.exports = { render: render, staticRenderFns: staticRenderFns }
 if (false) {
   module.hot.accept()
   if (module.hot.data) {
-    require("vue-hot-reload-api")      .rerender("data-v-650f2efa", module.exports)
+    require("vue-hot-reload-api")      .rerender("data-v-b6ebd97a", module.exports)
   }
 }
 
