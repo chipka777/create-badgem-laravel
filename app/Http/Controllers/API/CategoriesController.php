@@ -8,8 +8,13 @@ use App\Category;
 
 class CategoriesController extends Controller
 {
-    public function getAll()
+    public function getAll($paginate = 0)
     {
        return Category::all();
+    }
+
+    public function getAllVisibility()
+    {
+       return Category::where('visibility',1)->get();
     }
 }

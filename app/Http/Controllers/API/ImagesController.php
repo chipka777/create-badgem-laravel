@@ -33,6 +33,35 @@ class ImagesController extends Controller
         return $images;
     }
 
+    public function getImagesByCountAll($category_id, $count, $offset)
+    {
+        if ($category_id == 'all') {
+            $images =  Image::orderBy('id', 'desc')
+                ->offset($offset)
+                ->limit($count)
+                ->get();
+        }else {
+            $images = Image::where('cat_id', $category_id)
+                ->orderBy('id', 'desc')
+                ->offset($offset)
+                ->limit($count)
+                ->get();
+        }
+
+        return $images;
+    }
+
+    public function getCountByCategory($category_id)
+    {
+        if ($category_id == 'all') $count = Image::count();
+
+        else $count = Image::where('cat_id', $category_id)->count();
+
+        $data = ['count' => $count];
+
+        return $count;
+    }
+
     public function getImagesFromInstagram()
     {
         $panel = "";
@@ -89,9 +118,9 @@ class ImagesController extends Controller
                 $image['src'] = "tmp_main_" . $image['width'] . $key . ".png";
                 $tmps[] = "tmp_main_" . $image['width'] . $key . ".png";
             }
-            exec("convert -resize " . $image['width'] . "x " . $image['src'] . " " . "tmp_" . $image['width'] . $key . ".png");
+            exec("convert -resize " . $image['width'] . "x '" . $image['src'] . "' " . "'tmp_" . $image['width'] . $key . ".png'");
             $str = "composite \( -geometry +" . $image['left'] . "+" . $image['top'] . 
-                    " -rotate " . $image['rotate'] . " " . "tmp_" . $image['width'] . $key . ".png \)" . " Badge.png Badge.png \n ";
+                    " -rotate " . $image['rotate'] . " " . "'tmp_" . $image['width'] . $key . ".png' \)" . " Badge.png Badge.png \n ";
             $cmd .= $str;
 
             $tmps[] = "tmp_" . $image['width'] . $key . ".png";

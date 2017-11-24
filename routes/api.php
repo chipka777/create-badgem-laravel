@@ -13,8 +13,11 @@ use Illuminate\Http\Request;
 |
 */
 Route::group(['namespace' => 'API', 'prefix' => 'v1'], function() {
-    Route::get('categories', 'CategoriesController@getAll');
+    Route::get('categories/all', 'CategoriesController@getAll');
+    Route::get('categories', 'CategoriesController@getAllVisibility');
+    Route::get('images/count/{category_id}', 'ImagesController@getCountByCategory');
     Route::get('images/{category_id}/{count}/{offset}', 'ImagesController@getImagesByCount');
+    Route::get('images/all/{category_id}/{count}/{offset}', 'ImagesController@getImagesByCountAll');
     Route::get('images/instagram', 'ImagesController@getImagesFromInstagram');
     Route::post('images/create', 'ImagesController@createBadgemImage');
 });

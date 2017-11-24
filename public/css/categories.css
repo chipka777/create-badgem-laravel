@@ -1,0 +1,54 @@
+.create-modal-btn {
+    margin-top: 20px;
+    z-index: 2;
+    margin-right: 20px;
+    position: relative;
+}
+
+.loader {
+    position: relative;
+    left: 47%;
+    border: 12px solid #f3f3f3; /* Light grey */
+    border-top: 12px solid #3498db; /* Blue */
+    border-radius: 50%;
+    width: 70px;
+    height: 70px;
+    animation: spin 2s linear infinite;
+}
+
+@keyframes spin {
+    0% { transform: rotate(0deg); }
+    100% { transform: rotate(360deg); }
+}
+
+#category-table {
+    display:none;
+}
+
+.category-check {
+    margin-left: 20px;
+}
+.category-check input {
+    cursor: pointer;
+}
+.del-category-name {
+    font-weight: 800;
+}
+
+.mgmt-btn {
+    font-size: 24px;
+    text-align: center;
+    background: #f9f8f7;
+    padding: 80px;
+    padding-left: 10px;
+    padding-right: 10px;
+    transition: all 2.5s ease;
+    cursor: pointer;
+    color: #7e6a6d;
+    border-radius: 5px;
+}
+
+.mgmt-btn:hover {
+    color: #3b98c8;
+    background: #cedade;
+}
