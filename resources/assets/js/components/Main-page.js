@@ -5,14 +5,24 @@ Vue.component('main-page', {
             images: [],
             offset: 0,
             flag: 0,
+            flagMany: 0,            
             spiral: 0,
             insta: 0,
             counter: 0,
+            itemsOnPage: 10,
+            itemsTmp: 0,
+            stop: 0,
+            instaProgress: 0,
+            sections: [],
+            bitcoinData: {},
+            section: false,
+            animation: false,
         }
     },
     mounted: function() {
         this.getCategories();
         this.getImages();
+        
     },
     methods: {
         getCategories: function() {
@@ -23,37 +33,45 @@ Vue.component('main-page', {
             });
         },
 
-        getImages: function(cat_id = 'all', count = 20) {
-
+        getImages: function(cat_id = 'all', count = 70, cat = false) {
+            if (cat) this.hideCat();
+           
             if (cat_id == '0') cat_id = 'all';
 
             this.$http.get('/api/v1/images/' + cat_id + '/' + count + '/0').then(response => {
-
+               if (cat) this.showCat();
                 this.images = response.data;
-                this.offset = 20;
+                this.offset = 50;
             }, response => {
                 console.log('Some error with images api!');
             });
         },
 
         getInstaImages: function () {
-            this.$http.get('/api/v1/images/instagram').then(response => {
+            if (this.section) return false;
+            this.hideNav();
+
+            this.$http.post('/api/v1/images/instagram').then(response => {
                 this.insta = 1;
                 this.images = response.data;
                 this.offset = 20;
-
+                this.showNav();
             }, response => {
                 console.log('Some error with instagram images api!');
             });
         },
 
         setImageToPanels: function(last, cat_id = 'all') {
-            if (this.flag) return false;
+            if (this.flag || this.stop) return false;
+
             this.flag = 1;
-            this.$http.get('/api/v1/images/' + cat_id + '/10/' + this.offset).then(response => {
-                
-                this.offset += 10;
-                //images =  this.images.concat(response.data);
+            this.hideNav();
+            
+            this.$http.get('/api/v1/images/' + cat_id + '/20/' + this.offset).then(response => {
+                this.offset += 20;
+                if (response.data.length < 1) this.stop = 1;
+
+
                 images = response.data;                
                 last_num = this.images[this.images.length - 1].num;
 
@@ -65,10 +83,9 @@ Vue.component('main-page', {
                 images =  this.images.concat(images);
 
                 this.images = images;
-               /* for (var i = 0; i < images.length; i++) {
-                    $('.panels').append('<div id="img-'+images[i].id+'" data-pos="'+(last+i+1)+'" class="panel canva-img test pos'+(last+i+1)+'"><img onmousedown="panelImg(event, $(this))" src="upload/'+images[i].name+'"></div>');
-                }*/
+
                 this.flag = 0;
+                this.showNav();
                 this.spiralRight();
             }, response => {
                 console.log('Some error with images api!');
@@ -80,22 +97,20 @@ Vue.component('main-page', {
             self = this;
             cat_id = $('#select-cat').val();
             if (cat_id == '0') cat_id = 'all';
-            if (last < 19 && !this.flag) this.setImageToPanels(last + 1, cat_id);
-            if (this.flag) return false;
-            ln = this.images.length;
-            images = this.images;
-            for(var i = 0; i < ln; i++) {
-                images[i].num -= 1;
-            }
-            this.images = images;
-            /*$('.panels').children().each(function() {
-                pos = Number($(this).attr('data-pos'));
-                $(this).children('img').attr('data-pos', pos-1);
-                $(this).attr('data-pos', pos-1).removeClass('pos'+pos).addClass('pos'+ (pos-1));
 
-                this.flag = 1;
-            });*/
-            this.flag = 0;
+            if (last < 9 && !this.flag) this.setImageToPanels(last + 1, cat_id);
+            if (this.flag) return false;
+
+            if (last > 0) {
+                ln = this.images.length;
+                images = this.images;
+                for(var i = 0; i < ln; i++) {
+                    images[i].num -= 1;
+                }
+                this.images = images;
+
+                this.flag = 0;
+            }
         },
 
         spiralLeft: function() {
@@ -106,14 +121,45 @@ Vue.component('main-page', {
                 for(var i = 0; i < ln; i++) {
                     images[i].num += 1;
                 }
+                
                 this.images = images;
-                /*
-                $('.panels').children().each(function() {
-                    pos = Number($(this).attr('data-pos'));
-
-                    $(this).attr('data-pos', pos+1).removeClass('pos'+pos).addClass('pos'+ (pos+1));
-                });*/
             }
+        },
+        spiralManyLeft: function() {
+            if (this.flagMany) return false;
+            this.flagMany = 1;
+            var self = this;
+            self.itemsTmp = 0;
+            var timer = setInterval(function() {
+                    self.spiralLeft();
+                    self.itemsTmp += 1;
+                    first = Number($('.panels div:first-child').attr('data-pos'));
+                    if (self.itemsTmp > 9 || first >= 1) {
+                        clearInterval(timer);
+                        self.itemsTmp = 0;
+                        self.flagMany = 0;
+                    }
+                }, 150);
+    
+        },
+
+        spiralManyRight: function() {
+           
+            if (this.flagMany) return false;
+            this.flagMany = 1;
+            var self = this;
+            self.itemsTmp = 0;
+            var timer = setInterval(function() {
+                    setTimeout(self.spiralRight, 0 );
+                    self.itemsTmp += 1;
+                    if (self.flag) self.itemsTmp -= 1;
+                    if (self.itemsTmp > 9) {
+                        clearInterval(timer);
+                        self.itemsTmp = 0;
+                        self.flagMany = 0;
+                    }
+                }, 150);
+    
         },
 
         savePNG: function() {
@@ -136,8 +182,128 @@ Vue.component('main-page', {
             this.$http.post('/api/v1/images/create', {'images': images}).then(response => {
                 window.location.replace("http://create.badge-m.com/download");
             }, response => {
-                alert('Some error with images api!');
+                console.log('Some error with images api!');
             });
+        },
+
+        getBicoinCash: function() {
+
+        if (this.bitcoinData.bid) {return false};
+
+            this.hideBtc();
+            this.$http.get('/api/v1/bitcoins/ticker').then(response => {
+                this.bitcoinData = response.body;
+                this.showBtc();
+            }, response => {
+                console.log('Some error with images api!');
+            });
+
+        },
+        
+        hideNav: function() {
+            $('.button-nav').hide();
+            $('.spiral-nav').hide();
+            $('.preloader').fadeIn('slow');
+        },
+
+        showNav: function() {
+            $('.preloader').hide();
+            $('.button-nav').fadeIn('slow');
+            $('.spiral-nav').fadeIn('slow');
+        },
+
+        hideBtc: function() {
+            $('#bitcoin-section').hide();
+            setTimeout(function() {
+                $('.preloader').fadeIn('slow');
+            }, 1000);
+        },
+
+        showCat: function() {
+           // setTimeout(function() {
+                $('.preloader').hide();
+                $('#category-section').fadeIn('slow');
+             //}, 1000);
+        },
+
+        hideCat: function() {
+            $('#category-section').hide();
+            //setTimeout(function() {
+                $('.preloader').fadeIn('slow');
+           // }, 00);
+        },
+
+        showBtc: function() {
+          setTimeout(function() {
+                $('.preloader').hide();
+                $('#bitcoin-section').fadeIn('slow');
+            }, 1000);
+        },
+
+
+        showCanvas: function() {
+            $('.main-navigation').fadeOut();
+            $('.main-canvas').css("display", "flex")
+                            .hide()
+                            .fadeIn();
+        },
+
+        showSection: function(section, left) {
+            if (this.animation) return false;
+
+            this.animation = true;
+
+            if (this.sections[section]) {
+                this.hideSection(section);
+                return false;
+            }
+
+            if (this.section) return false;
+
+            this.section = true;
+
+            if (section == 'bitcoin')  this.getBicoinCash();
+
+            this.sections[section] = true;
+
+            showSection = section + '-section';
+            section += '-nav';
+            left = left + '%';
+
+            $('.button-nav').children('div:not(#' + section + ')').animate({opacity: 0}, 1000);
+
+            $('#' + section).animate({'top': '-73%'}, 500).animate({ 'left': left}, 500).css('z-index', 100);
+
+            var self = this;
+            setTimeout(function() {
+                $('#' + showSection).fadeIn('slow');
+                self.animation = false;
+            }, 2000);
+
+            
+        },
+
+        hideSection: function(section) {
+            
+            this.section = false;
+
+            this.sections[section] = false;
+
+            showSection = section + '-section';
+            section += '-nav';
+            setTimeout(function() {
+                $('#' + showSection).fadeOut('slow');
+            }, 100);
+            $('.button-nav').children('div:not(#' + section + ')').animate({opacity: 1}, 1000);
+
+            $('#' + section).animate({'left': '0'}, 500).animate({ 'top': '0'}, 500).css('z-index', 1);
+
+             var self = this;
+
+            setTimeout(function() {
+                 self.animation = false;
+            }, 550);
+           
         }
     }
 }) 

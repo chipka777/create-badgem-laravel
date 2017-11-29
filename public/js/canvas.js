@@ -12,6 +12,8 @@ function canvasScale(e,elem) {
     $('html').on('mousemove', function(e) {
             h = elem.parent().height();
             res = e.pageY - p;
+
+         
             
             a = res/(h*0.15);
         
@@ -25,8 +27,33 @@ function canvasScale(e,elem) {
             range = finish - start;
 
             if (n <= finish && n >= start && latest) {
+                
+                if (n > 70) {
+                    n = 78;
+                    angle = 0;
+                }
+                if (n > 52 && n < 70) {
+                    n = 54;
+                    angle = 90;
+                }
+                if (n > 34 && n < 52) {
+                    n = 36;
+                    angle = 180;
+                }
+                if (n > 16 && n < 34) {
+                    n = 18;
+                    angle = 270;
+                }
+                if (n < 16) {
+                    n = 4;
+                    angle = 360;
+                } 
+                
+
+                
                 elem.css('top', n +"%");
-                setRotationDegrees(latest, n , range);
+                latest.parent().css("transform", 'rotate(' + angle +'deg)');
+                latest.parent().attr("data-angle", n);
             }
     })
     elem.on('dragstart', function (event) {
@@ -60,6 +87,7 @@ function panelImg(e,elem) {
         if (!canvas_enable) {
             var prev = prev_elem;
             showMain('drop');
+            showDrop();
         }
 
         obj.css({'z-index': 10000, 'transition-duration': '0.1s' });
@@ -106,12 +134,13 @@ function panelImg(e,elem) {
                 setLast(obj.clone().appendTo(".canvas").addClass('border')
                     .append('<span class="img-control" onmousedown="resizeImg(event, $(this))"></span')
                     .append('<span class="img-control-delete" onmousedown="deleteImg(event, $(this))"><i class="fa fa-close fa-5" aria-hidden="true"></i></span')
-                    .children('img').addClass('border-active').attr('onmousedown', ''));
+                    .children('img').addClass('border-active').removeClass('insta-img').attr('onmousedown', ''));
                 canvasImg();
             }
              
             obj.attr('style', '');
             showMain(prev);
+            hideDrop();
             $(document).off("mouseup");
             
         });
@@ -240,15 +269,17 @@ function setRotationDegrees(obj, rotate = 0, range = 74, flag = false) {
 
 function canvasShow() {
     canvas_enable = true;
-    $(".main").css("display", 'none');
-    $(".frame-main").css("display", 'none');    
-    $(".main-canvas").css("display", 'flex');
+    $(".main").hide()
+    $(".frame-main").hide() 
+    $(".main-canvas").css("display", 'flex').fadeIn('slow');
+    $('.spiral-nav-canvas').fadeIn('slow');  
 }
 function canvasHide() {
     canvas_enable = false;
-    $(".main").css("display", 'block');
-    $(".frame-main").css("display", 'block');    
-    $(".main-canvas").css("display", 'none');
+    $(".main-canvas").hide();
+    $(".main").fadeIn('slow');
+    $(".frame-main").fadeIn('slow');   
+    $('.spiral-nav-canvas').hide(); 
 
 }
 
@@ -334,4 +365,33 @@ function savePDF() {
 		    alert("Error!");
 		}
 	});	
+}
+
+$(document).ready(function() {
+    setTimeout(function() {
+        $('.button-nav').height($('.button-nav').height());
+    }, 300);
+
+})
+
+
+$(window).resize(function() {
+    $('.button-nav').attr('style','height:auto');    
+    $('.button-nav').height($('.button-nav').height());
+})
+
+function showDrop() 
+{
+    $('.button-nav').hide();
+    $('.button-sections').hide();
+    $('.spiral-nav').hide();
+    $('.drop-me').fadeIn('slow');
+}
+
+function hideDrop()
+{
+    $('.button-nav').fadeIn('slow');
+    $('.button-sections').css('display','flex').fadeIn('slow');
+    $('.spiral-nav').fadeIn('slow');
+    $('.drop-me').hide();
 }

@@ -17,14 +17,19 @@ window.Vue = require('vue');
 require('vue-resource');
 require('jquery');
 
+
+require('./components/Navigation');
 require('./components/Main-page');
 require('./components/Categories');
 require('./components/Images');
 require('./components/Images-create');
 
-
 //Vue.component('categories', require('./components/Categories.js'));
 Vue.http.headers.common['X-CSRF-TOKEN'] = document.head.querySelector('meta[name="csrf-token"]').content;
+Vue.http.interceptors.push((request, next) => {
+    request.credentials = true;
+    next();
+});
 const app = new Vue({
     el: '#app',
     data: {
