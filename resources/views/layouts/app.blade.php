@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html>
     <head>
-        <title>Don't Wait. Create</title>
+        <title>Love'M .... Badge'M.</title>
         <link rel="stylesheet" href="{{ asset('css/style.css') }}" />
         <link rel="stylesheet" href="http://code.jquery.com/ui/1.10.3/themes/smoothness/jquery-ui.css" />
         <link rel="stylesheet" href="{{ asset('bootstrap/css/bootstrap.min.css')}}" />        
@@ -19,6 +19,10 @@
     </head>
     <body>
         @yield('content')
+
+
+
+        
         <script src="{{ asset('js/main.js') }}"></script>
         <script src="{{ asset('js/app.js') }}"></script>
         <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js" integrity="sha384-Tc5IQib027qvyjSMfHjOMaLkfuWVxZxUPnCJA7l2mCWNIpG9mGCD8wGNIcPD7Txa" crossorigin="anonymous"></script>

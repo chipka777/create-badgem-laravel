@@ -14,25 +14,10 @@
                             <span></span>
                         </div>
                     </div> 
-                    <div class="row button-nav" >
-                        <div id="insta-nav" class="col-md-2 col-md-offset-1 btn-nav first-nav" @click="getInstaImages">
-                            <img src="{{ asset('img/insta-nav.png') }}" />
-                        </div>
-                        <div id="bitcoin-nav" class="col-md-2 btn-nav">
-                            <img src="{{ asset('img/bitcoin-nav.png') }}"@click="showSection('bitcoin', -28)" />
-                        </div>    
-                        <div id="members-nav" class="col-md-2 btn-nav">
-                            <img src="{{ asset('img/canvas-nav.png') }}" @click="showSection('members', -49)" />
-                        </div>
-                        <div id="category-nav" class="col-md-2 btn-nav cat-nav">
-                            <img src="{{ asset('img/category-nav.png') }}" @click="showSection('category', 6)" />
-                        </div>                                                                                                                              
-                    </div>
-
                     <div class="row button-sections">
-                        <div id="members-section" >
+                        <div id="members-section" class="halfwd" >
+                            @if (!\Auth::user())
                             <span class="title">Members</span>
-                             @if (!\Auth::user())
                                 <form method="POST" action="{{ route('login') }}">
                                     {{ csrf_field() }}
                                     <div class="form-group">
@@ -85,18 +70,35 @@
 
                         </div>
                     </div>
+
+                    <div class="row button-nav" >
+                        <div id="insta-nav" class="col-md-3  first-nav spec-nav" @click="getInstaImages">
+                            <img src="{{ asset('img/insta-nav.png') }}" />
+                        </div>
+                        <div id="bitcoin-nav" class="col-md-3  spec-nav">
+                            <img src="{{ asset('img/bitcoin-nav.png') }}"@click="showSection('bitcoin', -24)" />
+                        </div>    
+                        <div id="members-nav" class="col-md-3 btn-nav">
+                            <img src="{{ asset('img/canvas-nav.png') }}" @click="showSection('members', -49)" />
+                        </div>
+                        <div id="category-nav" class="col-md-3 btn-nav cat-nav">
+                            <img src="{{ asset('img/category-nav.png') }}" @click="showSection('category', 6)" />
+                        </div>                                                                                                                              
+                    </div>
+
+                    
                     
                     <div class="row spiral-nav" >
-                        <div class="col-md-1 spl-nav first-spl-nav" @click="spiralLeft">
+                        <div class="col-md-3 spl-navig spl-self-nav" @click="spiralLeft">
                             <img src="{{ asset('img/self-left-nav.png') }}" />
                         </div>
-                        <div class="col-md-1 spl-nav left-all-nav" @click="spiralManyLeft">
+                        <div class="col-md-3 spl-navig spl-many-nav" @click="spiralManyLeft">
                             <img src="{{ asset('img/many-left-nav.png') }}" />
                         </div>    
-                        <div class="col-md-1 spl-nav right-all-nav" @click="spiralManyRight">
+                        <div class="col-md-3 spl-navig spl-many-nav-r" @click="spiralManyRight">
                             <img src="{{ asset('img/many-right-nav.png') }}" />                                
                         </div>
-                        <div class="col-md-1 spl-nav right-self-nav" @click="spiralRight">
+                        <div class="col-md-3 spl-navig spl-self-nav-r" @click="spiralRight">
                             <img src="{{ asset('img/self-right-nav.png') }}" />
                         </div>   
                     </div>
@@ -201,6 +203,7 @@
                    
                 </div>--><!-- END MAIN -->
                 <div class="main-canvas">
+                    
                     <div class="scale-line">
                         <div class="scale-back">
                             <div id="canvas-line" class="scale-line-front" ondragstart="return false;" >
@@ -208,32 +211,52 @@
                             </div>
                         </div>
                     </div>
-                    <div class="canvas" ondragstart="return false;" onmousedown="hideLatest()"></div>
+                    <div class="canvas" ondragstart="return false;" onmousedown="hideLatest()">
+                        <div class="canvas-mask"></div>
+                        <div class="preloader text-center canvas-loader">
+                            <div id="preloader_1">
+                                <span></span>
+                                <span></span>
+                                <span></span>
+                                <span></span>
+                                <span></span>
+                            </div>
+                        </div> 
+
+                    </div>
                     <div class="canvas-btn">
                         <div class="canvas-btn-home" onclick="canvasHide()" ></div>
                         <div class="canvas-btn-scale" @click="savePNG"></div>
                         
                     </div>
-                    <div class="row spiral-nav-canvas " >
-                        <div class="col-md-1 spl-nav-canvas first-spl-nav" @click="spiralLeft">
-                            <img src="{{ asset('img/self-left-nav.png') }}" />
-                        </div>
-                        <div class="col-md-1 spl-nav-canvas left-all-nav-canvas" @click="spiralManyLeft">
-                            <img src="{{ asset('img/many-left-nav.png') }}" />
-                        </div>    
-                        <div class="col-md-1 spl-nav-canvas right-all-nav-canvas" @click="spiralManyRight">
-                            <img src="{{ asset('img/many-right-nav.png') }}" />                                
-                        </div>
-                        <div class="col-md-1 spl-nav-canvas right-self-nav" @click="spiralRight">
-                            <img src="{{ asset('img/self-right-nav.png') }}" />
-                        </div>   
-                    </div>
+                   
                 </div>
 
                 <div class="panels">
-                    <div :id='"img-"+image.id' :class='"panel pos"+image.num+" canva-img"' v-for='(image, key) in images' :data-pos="image.num">
-                        <img onmousedown='panelImg(event, $(this))' :src='"upload/" + image.name' v-if="!image.insta" :data-pos="image.num"/>
-                        <img class="insta-img" onmousedown='panelImg(event, $(this))' :src='image.name' v-else :data-pos="image.num"/>
+                    <div :id='"img-"+image.id' :class='"panel pos"+image.num+" canva-img"' v-for='(image, key) in images' :data-pos="image.num" >
+                        <img onmousedown='panelImg(event, $(this))' :src='"upload/" + image.name' v-if="!image.insta" :data-pos="image.num" @mouseenter="showToolTip($event, key)" @mouseleave="hideToolTip($event, key)" />
+                        <img class="insta-img" onmousedown='panelImg(event, $(this))' :src='image.name' v-else :data-pos="image.num" />
+                    </div>
+                </div>
+                <div id="bottom-nav">
+                    <div class="bottom-trigger" onmouseenter="botTrigerEnter()" onmouseleave="botTrigerLeave()" onclick="botMenuOpen()">
+                    Tools 
+                    </div>
+                    <div class="bottom-menu">
+                        <div class="btn-bot-nav">
+                            <div class="col-md-2 col-md-offset-1 self-bot-nav bot-right" @click="spiralLeft">
+                                <img src="{{ asset('img/self-left-tool.png') }}" />                                
+                            </div>
+                            <div class="col-md-2 many-bot-nav bot-right" @click="spiralManyLeft">
+                                <img src="{{ asset('img/many-left-tool.png') }}" />                                
+                            </div>
+                            <div class="col-md-2 space-bot many-bot-nav bot-left" @click="spiralManyRight">
+                                <img src="{{ asset('img/many-right-tool.png') }}" />                                
+                            </div>
+                            <div class="col-md-2 self-bot-nav bot-left" @click="spiralRight">
+                                <img src="{{ asset('img/self-right-tool.png') }}" />                                
+                            </div>
+                        </div>
                     </div>
                 </div>
             </div>

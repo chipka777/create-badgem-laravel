@@ -50,12 +50,14 @@ Vue.component('main-page', {
         getInstaImages: function () {
             if (this.section) return false;
             this.hideNav();
+            
 
             this.$http.post('/api/v1/images/instagram').then(response => {
                 this.insta = 1;
                 this.images = response.data;
                 this.offset = 20;
                 this.showNav();
+                this.hideToolTip();
             }, response => {
                 console.log('Some error with instagram images api!');
             });
@@ -165,6 +167,8 @@ Vue.component('main-page', {
         savePNG: function() {
             html = '';
             images = [];
+            $('.canvas-mask').fadeIn('slow');
+            $('.canvas-loader').fadeIn('slow');
             $('.canvas>.canva-img').each(function (num,item) {
                 image = {
                     'height': ((Math.round($(this).height() / $(this).parent().height() * 100) * 768)/100),
@@ -180,7 +184,9 @@ Vue.component('main-page', {
             });
             
             this.$http.post('/api/v1/images/create', {'images': images}).then(response => {
-                window.location.replace("http://create.badge-m.com/download");
+                a = window.location.replace("http://create.badge-m.com/download");
+                $('.canvas-mask').fadeOut('slow');
+                $('.canvas-loader').fadeOut('slow');
             }, response => {
                 console.log('Some error with images api!');
             });
@@ -270,9 +276,11 @@ Vue.component('main-page', {
             section += '-nav';
             left = left + '%';
 
+            $('.button-sections').css('z-index', 2);
+
             $('.button-nav').children('div:not(#' + section + ')').animate({opacity: 0}, 1000);
 
-            $('#' + section).animate({'top': '-73%'}, 500).animate({ 'left': left}, 500).css('z-index', 100);
+            $('#' + section).animate({'top': '-58%'}, 500).animate({ 'left': left}, 500).css('z-index', 100);
 
             var self = this;
             setTimeout(function() {
@@ -294,6 +302,7 @@ Vue.component('main-page', {
             setTimeout(function() {
                 $('#' + showSection).fadeOut('slow');
             }, 100);
+            $('.button-sections').css('z-index', 0);
             $('.button-nav').children('div:not(#' + section + ')').animate({opacity: 1}, 1000);
 
             $('#' + section).animate({'left': '0'}, 500).animate({ 'top': '0'}, 500).css('z-index', 1);
@@ -304,6 +313,33 @@ Vue.component('main-page', {
                  self.animation = false;
             }, 550);
            
+        },
+
+        showToolTip: function(event, index) {
+            if (window.main_flag) return false;
+            var img = this.images[index];
+
+            var style = "top:" + (event.pageY + 10) + 'px;left:' + (event.pageX + 10) + 'px;';
+
+            var date = new Date(img.created_at);
+
+            date = date.getDate() + '-' + date.getMonth() + '-' + date.getFullYear();
+            
+            $('body').prepend('<div id="tooltip" style="'+style+'">Created: '+ date +' <br/> Author: '+img.user+' <br/> Favorited : 0</div>');
+
+            $('html').on('mousemove', function(event) {
+                $('#tooltip').css({'top': event.pageY + 10, 'left': event.pageX + 10});
+            });
+
+            
+          
+        },
+
+        hideToolTip: function(event, index) {
+            if (window.main_flag) return false;
+            $('html').off('mousemove');
+
+            $('#tooltip').remove();
         }
     }
 }) 

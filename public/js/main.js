@@ -201,3 +201,34 @@ function searchCate(actionValue)
     });
 
 }
+
+var flagBot = false;
+
+function botTrigerEnter()
+{
+    if (flagBot) return false;
+    
+    $('#bottom-nav').css('bottom', '-40px');
+}
+
+function botTrigerLeave()
+{
+    if (flagBot) return false;
+    $('#bottom-nav').css('bottom', '-50px');
+}
+
+function botMenuOpen()
+{
+    if (flagBot) return botMenuClose();
+
+    flagBot = true;
+
+    $('#bottom-nav').css('bottom', '0px');
+}
+
+function botMenuClose()
+{
+    flagBot = false;
+    $('#bottom-nav').css('bottom', '-50px');
+}
+

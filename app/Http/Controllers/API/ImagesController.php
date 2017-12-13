@@ -5,6 +5,7 @@ namespace App\Http\Controllers\API;
 use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
 use App\Image;
+use App\User;
 
 class ImagesController extends Controller
 {
@@ -26,6 +27,8 @@ class ImagesController extends Controller
         }
 
         foreach($images as  $key => $image) {
+
+            $image->user = ucfirst(User::find($image->user_id)->name);
             $image->num = $key + 1;
             $image->insta = 0;
         }
@@ -118,7 +121,7 @@ class ImagesController extends Controller
                 $image['src'] = "tmp_main_" . $image['width'] . $key . ".png";
                 $tmps[] = "tmp_main_" . $image['width'] . $key . ".png";
             }
-            exec("convert -resize " . $image['width'] . "x '" . $image['src'] . "' " . "'tmp_" . $image['width'] . $key . ".png'");
+            exec("convert -resize x" . $image['height'] . " '" . $image['src'] . "' " . "'tmp_" . $image['width'] . $key . ".png'");
             $str = "composite \( -geometry +" . $image['left'] . "+" . $image['top'] . 
                     " -rotate " . $image['rotate'] . " " . "'tmp_" . $image['width'] . $key . ".png' \)" . " Badge.png Badge.png \n ";
             $cmd .= $str;
@@ -134,4 +137,4 @@ class ImagesController extends Controller
     }
 }
 
-//convert -size 1152x768 xc:white Badge.png composite -geometry +311.04+238.08 -rotate 60.007741981843 tmp_230.40.png Badge.png Badge.png composite -geometry +702.72+230.4 -rotate 0 tmp_230.41.png Badge.png Badge.png
+// 66.6 100 convert -size 1152x768 xc:white Badge.png composite -geometry +311.04+238.08 -rotate 60.007741981843 tmp_230.40.png Badge.png Badge.png composite -geometry +702.72+230.4 -rotate 0 tmp_230.41.png Badge.png Badge.png

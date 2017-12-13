@@ -1,5 +1,5 @@
 var canvas_enable = false;
-
+var main_flag = false;
     /*
     * Scale
     */
@@ -71,6 +71,11 @@ function canvasScale(e,elem) {
 
     //$(".panel img").on("mousedown", function(e){
 function panelImg(e,elem) {
+       
+        main_flag = true;
+
+        $('#tooltip').remove();
+       
         var elem = elem;
 
         var obj = elem.parent();
@@ -95,7 +100,7 @@ function panelImg(e,elem) {
         //$('html').append($(this));
 
         $('html').on('mousemove', function(e) {
-               
+                
                 res_y = (top + e.pageY - y)/obj.parent().height() * 100;
                 res_x = (left + e.pageX - x)/obj.parent().width() * 100;
 
@@ -108,6 +113,7 @@ function panelImg(e,elem) {
 
         $(document).on('mouseup', function() {
             $('html').off('mousemove');
+             main_flag = false;
              if (!canvas_enable){
                     status = checkPosition(elem, $(".main"));
 
@@ -136,6 +142,8 @@ function panelImg(e,elem) {
                     .append('<span class="img-control-delete" onmousedown="deleteImg(event, $(this))"><i class="fa fa-close fa-5" aria-hidden="true"></i></span')
                     .children('img').addClass('border-active').removeClass('insta-img').attr('onmousedown', ''));
                 canvasImg();
+
+                $('#bottom-nav').show();
             }
              
             obj.attr('style', '');
@@ -273,6 +281,7 @@ function canvasShow() {
     $(".frame-main").hide() 
     $(".main-canvas").css("display", 'flex').fadeIn('slow');
     $('.spiral-nav-canvas').fadeIn('slow');  
+    $('#bottom-nav').show();
 }
 function canvasHide() {
     canvas_enable = false;
@@ -280,6 +289,8 @@ function canvasHide() {
     $(".main").fadeIn('slow');
     $(".frame-main").fadeIn('slow');   
     $('.spiral-nav-canvas').hide(); 
+    $('#bottom-nav').hide();
+    
 
 }
 
