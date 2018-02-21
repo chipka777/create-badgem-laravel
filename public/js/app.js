@@ -27044,7 +27044,7 @@ Vue.component('main-page', {
             section: false,
             animation: false,
             loading: false,
-            currForm: 'login'
+            memberStatus: ''
         };
     },
     mounted: function mounted() {
@@ -27235,8 +27235,6 @@ Vue.component('main-page', {
             var _this5 = this;
 
             if (this.bitcoinData.bid) {
-                this.hideBtc();
-                this.showBtc();
                 return false;
             };
             this.hideBtc();
@@ -27249,7 +27247,6 @@ Vue.component('main-page', {
         },
 
         hideNav: function hideNav() {
-            $('.menu-home-btn').hide();
             $('.button-nav').hide();
             $('.spiral-nav').hide();
             $('.preloader').fadeIn('slow');
@@ -27259,7 +27256,6 @@ Vue.component('main-page', {
             $('.preloader').hide();
             $('.button-nav').fadeIn('slow');
             $('.spiral-nav').fadeIn('slow');
-            $('.menu-home-btn').fadeIn('slow');
         },
 
         hideBtc: function hideBtc() {
@@ -27275,14 +27271,10 @@ Vue.component('main-page', {
             // setTimeout(function() {
             $('.preloader').hide();
             $('#category-section').fadeIn('slow');
-            $('.menu-home-btn').fadeIn('slow');
-
             //}, 1000);
         },
 
         hideCat: function hideCat() {
-            $('.menu-home-btn').hide();
-
             $('#category-section').hide();
             //setTimeout(function() {
             $('.preloader').fadeIn('slow');
@@ -27290,6 +27282,7 @@ Vue.component('main-page', {
         },
 
         showBtc: function showBtc() {
+            $('.button-sections').fadeIn('slow');
             setTimeout(function () {
                 $('.preloader').hide();
                 $('#bitcoin-section').fadeIn('slow');
@@ -27304,40 +27297,40 @@ Vue.component('main-page', {
 
         showSection: function showSection(section, left) {
             $('.menu-home-btn').hide();
-            if (this.animation) return false;
 
-            this.animation = true;
+            ///if (this.sections[section]) {
+            //    this.hideSection(section);
+            //     return false;
+            // }
+
+            // if (this.section) return false;
+
+            // this.section = true;
 
             if (section == 'bitcoin') this.getBicoinCash();
 
+            //this.sections[section] = true;
+
             var selectSection = section + '-section';
             section += '-nav';
-            left = left + '%';
 
-            $('.button-sections').css('z-index', 2);
+            $('.button-sections').css('z-index', 2).fadeIn();
 
             //hide buttons nav
             $('.button-nav').css({ 'position': 'absolute', 'display': 'none' });
 
             $('.button-nav').children('div:not(#' + section + ')').animate({ opacity: 0 }, 500);
 
-            // $('#' + section).animate({'top': '-58%'}, 500).animate({ 'left': left}, 500).css('z-index', 100);
+            if (this.memberStatus == 'register') return this.showRegister();
+            if (this.memberStatus == 'activate') return this.showRegisterActivate();
 
-            if (section == 'members-nav') {
-                if (this.currForm == 'register') {
-                    this.animation = false;
-                    return this.showRegister();
-                }
-                if (this.currForm == 'activate') {
-                    this.animation = false;
-                    return this.showRegisterActivate();
-                }
-            }
+            $('#' + section).animate({ opacity: 0 }, 0);
+
+            // $('#' + section).animate({'top': '-58%'}, 500).animate({ 'left': left}, 500).css('z-index', 100);
 
             var self = this;
             setTimeout(function () {
                 $('#' + selectSection).fadeIn('slow');
-                self.animation = false;
                 $('.menu-home-btn').fadeIn('slow');
             }, 2000);
         },
@@ -27356,7 +27349,7 @@ Vue.component('main-page', {
             $('.button-sections').css('z-index', 0);
             $('.button-nav').children('div:not(#' + section + ')').animate({ opacity: 1 }, 1000);
 
-            $('#' + section).css('z-index', 1);
+            $('#' + section).animate({ 'left': '0' }, 500).animate({ 'top': '0' }, 500).css('z-index', 1);
 
             var self = this;
 
@@ -27388,18 +27381,20 @@ Vue.component('main-page', {
 
             $('#tooltip').remove();
         },
+
         showRegister: function showRegister() {
-            this.currForm = 'register';
+            this.memberStatus = 'register';
             //$('#members-section').animate({opacity: 0}, 1000);
             $('#members-section').animate({ opacity: 1 }, 1000).hide();
 
             setTimeout(function () {
-                $('#register-section').fadeIn();
+                $('#register-section').fadeIn().animate({ opacity: 1 }, 0);
+                $('.menu-home-btn').fadeIn('slow');
             }, 550);
         },
 
         showRegisterActivate: function showRegisterActivate() {
-            this.currForm = 'activate';
+            this.memberStatus = 'activate';
 
             //$('#register-section').animate({opacity: 0}, 1000);
 
@@ -27407,11 +27402,12 @@ Vue.component('main-page', {
 
             setTimeout(function () {
                 $('#register-active-section').fadeIn();
+                $('.menu-home-btn').fadeIn('slow');
             }, 550);
         },
 
         hideRegisterActivate: function hideRegisterActivate() {
-            this.currForm = 'login';
+            this.memberStatus = '';
 
             $('#register-active-section').animate({ opacity: 0 }, 1000).hide();
 
@@ -27525,12 +27521,12 @@ Vue.component('main-page', {
                         message: 'Your account has been successfully activated',
                         duration: 10000
                     });
-
-                    _this8.hideRegisterActivate();
+                    _this8.memberStatus = '';
+                    _this8.openHome();
                 } else {
                     _this8.$notify.error({
                         title: 'Error',
-                        message: 'You entered an invalid code by try again',
+                        message: 'You entered an invalid code, please try again',
                         duration: 10000
                     });
                 }
@@ -27546,7 +27542,7 @@ Vue.component('main-page', {
         },
 
         hoverMenu: function hoverMenu() {
-            $('.menu-home-btn').css('top', '-2px');
+            $('.menu-home-btn').css('top', '-3px');
         },
 
         unhoverMenu: function unhoverMenu() {
@@ -27554,11 +27550,8 @@ Vue.component('main-page', {
         },
 
         openHome: function openHome() {
-            $('.button-sections').children().each(function (el) {
-                $(this).hide();
-            });
-
-            $('.button-nav').fadeIn('slow').children().animate({ opacity: 1 }, 300);
+            $('.button-sections').hide().children().fadeOut('slow');
+            $('.button-nav').fadeIn('slow').children().animate({ 'opacity': 1 }, 300);
         }
     }
 });
