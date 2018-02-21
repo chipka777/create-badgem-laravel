@@ -5,27 +5,45 @@ namespace App\Http\Controllers\API;
 use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
 use App\Image;
+use App\FavoritedImages;
 use App\User;
+use App\UserHistory;
+use Illuminate\Support\Facades\Auth;
+
 
 class ImagesController extends Controller
 {
     public function getImagesByCount($category_id, $count, $offset)
     {
-        if ($category_id == 'all') {
-            $images =  Image::where('approved', 1)
-                ->orderBy('id', 'desc')
-                ->offset($offset)
-                ->limit($count)
-                ->get();
+        if ($category_id == 'favorited') {
+            $favorited = new FavoritedImages;
+            $images = $favorited->imagesByUser(Auth::user()->id)
+                        ->orderBy('id', 'desc')
+                        ->offset($offset)
+                        ->limit($count)
+                        ->get()
+                        ->map(function ($item){
+                            $item->favorite = $item->checkIfFavorited();
+                            return $item;
+                        });
+
+                       
         }else {
             $images = Image::where('approved', 1)
-                ->where('cat_id', $category_id)
+                ->where(function ($q) use ($category_id) {
+                    if ($category_id != 'all') {
+                        $q->where('cat_id', $category_id);
+                    }
+                })
                 ->orderBy('id', 'desc')
                 ->offset($offset)
                 ->limit($count)
-                ->get();
+                ->get()->map(function ($item){
+                    $item->favorite = $item->checkIfFavorited();
+                    return $item;
+                });
         }
-
+       
         foreach($images as  $key => $image) {
 
             $image->user = ucfirst(User::find($image->user_id)->name);
@@ -38,31 +56,138 @@ class ImagesController extends Controller
 
     public function getImagesByCountAll($category_id, $count, $offset)
     {
-        if ($category_id == 'all') {
-            $images =  Image::orderBy('id', 'desc')
-                ->offset($offset)
-                ->limit($count)
-                ->get();
+        $user = Auth::user();
+
+        if ($category_id == 'favorited') {
+            $favorited = new FavoritedImages;
+            $images = $favorited->imagesByUser($user->id)
+                        ->orderBy('id', 'desc')
+                        ->offset($offset)
+                        ->limit($count)
+                        ->get()
+                        ->map(function ($item){
+                            $item->favorite = $item->checkIfFavorited();
+                            return $item;
+                        });
+                        
         }else {
-            $images = Image::where('cat_id', $category_id)
+            $images =  Image::
+                where(function($query) use ($category_id) {
+                    if ($category_id != 'all') $query->where('cat_id', $category_id);
+                })
                 ->orderBy('id', 'desc')
                 ->offset($offset)
                 ->limit($count)
-                ->get();
+                ->get()->map(function ($item){
+                    $item->favorite = $item->checkIfFavorited();
+                    return $item;
+                });
         }
+
+
+        return $images;
+    }
+
+    public function getImagesByUser($category_id, $count, $offset)
+    {
+        $user = Auth::user();
+
+        if ($user->hasRole('administrator')) {
+            return $this->getImagesByCountAll($category_id, $count, $offset);
+        }
+        
+        $images =  Image::
+            where(function($query) use ($category_id) {
+                if ($category_id != 'all') $query->where('cat_id', $category_id);
+            })
+            ->where('user_id', $user->id)
+            ->orderBy('id', 'desc')
+            ->offset($offset)
+            ->limit($count)
+            ->get()->map(function ($item){
+                $item->favorite = $item->checkIfFavorited();
+                return $item;
+            });
 
         return $images;
     }
 
     public function getCountByCategory($category_id)
     {
-        if ($category_id == 'all') $count = Image::count();
-
-        else $count = Image::where('cat_id', $category_id)->count();
+        if ($category_id == 'all') {
+            $count = Image::count();
+        }elseif($category_id == 'favorited') {
+            $favorited = new FavoritedImages;
+            $count = $favorited->imagesByUser(Auth::user()->id)->count();
+        }else {
+            $count = Image::where('cat_id', $category_id)->count();
+        }
 
         $data = ['count' => $count];
 
         return $count;
+    }
+
+    public function getCountByUser($category_id)
+    {
+        if (Auth::user()->hasRole('administrator')) {
+            return $this->getCountByCategory($category_id);
+        }
+
+        if ($category_id == 'all') {
+            $count = Image::where('user_id', Auth::user()->id)->count();
+        }elseif($category_id == 'favorited') {
+            $favorited = new FavoritedImages;
+            $count = $favorited->imagesByUser(Auth::user()->id)->count();
+        }else {
+            $count = Image::where('user_id', Auth::user()->id)->where('cat_id', $category_id)->count();
+        }
+
+        $data = ['count' => $count];
+
+        return $count;
+    }
+
+    public function addToFavorite($id) 
+    {
+        if (FavoritedImages::where('user_id', Auth::user()->id)->where('image_id', $id)->count()) return false;
+
+        Image::whereId($id)->increment('favorited');
+
+        $image = Image::whereId($id)->first();
+
+        $history = new UserHistory;
+
+        $data = [
+            'name' => $image->title,
+            'author' => ucfirst(Auth::user()->meta->first_name) . ' ' . ucfirst(Auth::user()->meta->last_name),
+            'id' => $image->user_id 
+        ];
+
+        $history->createFromTemplate('favorited', Auth::user(), $data);
+
+        return FavoritedImages::create(['user_id' => Auth::user()->id, 'image_id' => $id]);
+    }
+
+    public function removeFromFavorite($id) 
+    {
+        Image::whereId($id)->decrement('favorited');
+        
+        $image = Image::whereId($id)->first();
+
+        $history = new UserHistory;
+
+        $data = [
+            'name' => $image->title,
+            'author' => ucfirst(Auth::user()->meta->first_name) . ' ' . ucfirst(Auth::user()->meta->last_name),
+            'id' => $image->user_id 
+        ];
+
+        $history->createFromTemplate('unfavorited', Auth::user(), $data);
+
+        return FavoritedImages::where('user_id', Auth::user()->id)
+                ->where('image_id', $id)
+                ->delete();
     }
 
     public function getImagesFromInstagram()
@@ -135,6 +260,8 @@ class ImagesController extends Controller
               exec("rm $tmp");
             }
     }
+
+   
 }
 
 // 66.6 100 convert -size 1152x768 xc:white Badge.png composite -geometry +311.04+238.08 -rotate 60.007741981843 tmp_230.40.png Badge.png Badge.png composite -geometry +702.72+230.4 -rotate 0 tmp_230.41.png Badge.png Badge.png

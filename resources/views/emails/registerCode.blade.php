@@ -1,0 +1,1 @@
+Your register code : {{ $user->verify_code }}

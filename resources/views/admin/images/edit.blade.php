@@ -6,7 +6,6 @@
 @endsection
 @section('content')
     <!-- MAIN CONTENT -->
-    <div id="app">
         <images inline-template>
             <div class="main-content">
                 <div class="container-fluid">
@@ -26,7 +25,7 @@
                                 <div class="row" v-for="(row, first_key) in images">
                                     <div class="col-md-3" v-for="(image, second_key) in row">
                                         <a href="#" class="thumbnail" @click="openEditModal(image.id, first_key, second_key)">
-                                            <img :src="'/upload/' + image.name" />
+                                            <img :src="'/upload/thumbs/' + image.name" />
                                         </a>
                                     </div>
                                 </div>
@@ -52,11 +51,9 @@
             
            
         </images>
-    </div>
     <!-- END MAIN CONTENT -->
 @endsection
 @section('scripts')
 
-<script src="{{ asset('js/app.js') }}"></script>
 
 @endsection

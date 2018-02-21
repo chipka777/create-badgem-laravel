@@ -9,7 +9,7 @@
                 <div class="loader edit-loader" v-show="loader"></div>
                 <div class="row edit-modal-body" v-if="editImage.name">
                     <div class="col-md-6 product_img">
-                        <img :src="'/upload/'+editImage.name" class="img-responsive">
+                        <img :src="'/upload/thumbs/'+editImage.name" class="img-responsive">
                     </div>
                     <div class="col-md-6 product_content">
                         <h4>Image name : <span>@{{ editImage.name }}</span>

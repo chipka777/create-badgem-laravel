@@ -6,7 +6,6 @@
 @endsection
 @section('content')
     <!-- MAIN CONTENT -->
-    <div id="app">
         <categories inline-template>
             <div class="main-content">
                 <div class="container-fluid">
@@ -62,11 +61,9 @@
             
            
         </categories>
-    </div>
     <!-- END MAIN CONTENT -->
 @endsection
 @section('scripts')
 
-<script src="{{ asset('js/app.js') }}"></script>
 
 @endsection

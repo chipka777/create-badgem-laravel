@@ -1,0 +1,1 @@
+You are invited as a designer, your code is :  {{ $user->invite_code }}

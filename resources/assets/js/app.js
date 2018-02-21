@@ -22,7 +22,16 @@ require('./components/Navigation');
 require('./components/Main-page');
 require('./components/Categories');
 require('./components/Images');
+require('./components/Images-show');
+require('./components/Images-favorite');
 require('./components/Images-create');
+require('./components/Admin-users');
+require('./components/Notification');
+require('./components/History');
+
+
+
+import ElementUI from 'element-ui'
 
 //Vue.component('categories', require('./components/Categories.js'));
 Vue.http.headers.common['X-CSRF-TOKEN'] = document.head.querySelector('meta[name="csrf-token"]').content;
@@ -30,7 +39,12 @@ Vue.http.interceptors.push((request, next) => {
     request.credentials = true;
     next();
 });
+
+Vue.use(ElementUI);
+
 const app = new Vue({
+    components: {
+      },
     el: '#app',
     data: {
     },

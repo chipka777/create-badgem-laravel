@@ -4,7 +4,6 @@
 @endsection
 @section('content')
     <!-- MAIN CONTENT -->
-    <div id="app">
         <images-create inline-template>
             <div class="main-content">
                 <div class="container-fluid">
@@ -27,9 +26,10 @@
                                 <span class="input-group-btn"> 
                                 <!-- image-preview-clear button -->
                                 <select class="form-control  image-preview-input image-category">
+                                    @role('administrator')
                                     <option value="all">Category</option>
+                                    @endrole
                                     <option :value="category.id" v-for="category in categories">@{{ category.name }}</option>
-                                    
                                 </select>
                                 <!-- image-preview-input -->
                                 <div class="btn btn-default image-preview-input"> <span class="glyphicon glyphicon-folder-open"></span> <span class="image-preview-input-title">Browse</span>
@@ -46,13 +46,13 @@
                             <div id="upload-zone" class="upload-drop-zone" >  
                                 <div class="row" v-for="(row, first_key) in uploadImages">
                                     <div class="col-md-3" v-for="(image, second_key) in row">
-                                        <a href="#" class="thumbnail" >
+                                        <a  class="thumbnail" >
                                             <div class="image-mask">
                                                 <h4>@{{ image.name }}</h4>
                                                 <button type="button" class="btn btn-primary" @click="openZoomModal(image.name)"><i class="fa fa-search-plus"></i>View</button>
                                                 <button type="button" class="btn btn-danger" @click="deleteImage(image.id)"><i class="fa fa-trash-o"></i> Delete</button>
                                             </div>
-                                            <img :src="'/upload/' + image.name" />
+                                            <img :src="'/upload/thumbs/' + image.name" />
                                         </a>
                                     </div>
                                 </div>
@@ -71,11 +71,9 @@
                 </div>
             </div>
         </images-create>
-    </div>
     <!-- END MAIN CONTENT -->
 @endsection
 @section('scripts')
 
-<script src="{{ asset('js/app.js') }}"></script>
 
 @endsection

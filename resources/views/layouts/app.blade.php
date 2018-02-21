@@ -2,10 +2,12 @@
 <html>
     <head>
         <title>Love'M .... Badge'M.</title>
+        <link rel="stylesheet" href="{{ asset('bootstrap/css/bootstrap.min.css')}}" />                
         <link rel="stylesheet" href="{{ asset('css/style.css') }}" />
+        <link rel="stylesheet" href="{{ asset('css/main-navigation.css') }}" />        
         <link rel="stylesheet" href="http://code.jquery.com/ui/1.10.3/themes/smoothness/jquery-ui.css" />
-        <link rel="stylesheet" href="{{ asset('bootstrap/css/bootstrap.min.css')}}" />        
-
+        <link rel="stylesheet" href="https://unpkg.com/element-ui/lib/theme-chalk/index.css">
+        
         <script src="http://code.jquery.com/jquery-1.10.2.min.js" type="text/javascript"></script>
         <script src="http://code.jquery.com/ui/1.10.3/jquery-ui.js" type="text/javascript"></script>
         <script src="https://use.fontawesome.com/03eca4d1ce.js"></script>

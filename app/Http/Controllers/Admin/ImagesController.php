@@ -5,9 +5,20 @@ namespace App\Http\Controllers\Admin;
 use Illuminate\Http\Request;
 use App\Http\Controllers\Controller;
 use App\Image;
+use App\FavoritedImages;
+use App\UserHistory;
+use App\Category;
+use Illuminate\Support\Facades\Auth;
+
 
 class ImagesController extends Controller
 {
+
+    public function __construct()
+    {
+        $this->middleware('role:designer|administrator')->except('showAll');
+
+    }
     /**
      * Display a listing of the resource.
      *
@@ -40,7 +51,12 @@ class ImagesController extends Controller
      */
     public function store(Request $request, $cat_id)
     {
-        
+        if (Auth::user()->hasRole('designer')){
+            $cat = Category::where('user_id', Auth::user()->id)->first();
+            if (!$cat || $cat_id != $cat->id) {
+                return response()->json("Please create your category", 415);
+            }
+        }
         $type = $request->files->get('image')->getMimeType();
 
         $valid = $this->validateImage($type);
@@ -51,7 +67,14 @@ class ImagesController extends Controller
             $name = $this->getRandomName() . '.' . $extension;
             
             $request->files->get('image')->move($path, $name);
+           
+            $img = new \Imagick(realpath("upload/$name"));
 
+            $wd = $img->getImageWidth();
+
+            if ($wd > 400) exec("convert upload/$name -resize x400 upload/thumbs/$name");
+            else exec("convert upload/$name upload/thumbs/$name");
+         
             $image = new Image;
 
             $image->name = $name;
@@ -62,10 +85,21 @@ class ImagesController extends Controller
             if ($cat_id == 'all') $image->cat_id = 0;
             else $image->cat_id = $cat_id;
 
-            if ($image->save()) return ['id' => $image->id, 'name' => $name]; 
+            if ($image->save()) {
+                $history = new UserHistory;
+
+                $data = [
+                    'name' => $image->title,
+                ];
+        
+                $history->createFromTemplate('uploaded', Auth::user(), $data);
+
+                return ['id' => $image->id, 'name' => $name]; 
+            } 
             else return  response()->json("Error with Database", 412);
-            
         }
+
+      
         
         return response()->json("$original_name : Invalid image type. Acceptable: png, jpeg, svg, gif.", 415);
 
@@ -123,8 +157,32 @@ class ImagesController extends Controller
      */
     public function destroy($id)
     {
-        Image::destroy($id);
+        $img = Image::find($id);
+        
+        $name = $img->name;
+
+        $data = [
+            'name' => $img->title,
+        ];
+
+        if ($img->destroy($id)) {
+            exec("rm upload/$name");
+            exec("rm upload/thumbs/$name");
+
+            FavoritedImages::where('image_id', $id)->delete();
+
+            $history = new UserHistory;
+
+            $history->createFromTemplate('removed', Auth::user(), $data);
+        }
         return 1;
+    }
+
+    public function showAll()
+    {
+        $page = 'images';
+
+        return view('admin.images.show', compact('page'));
     }
 
     private function validateImage($type) 
@@ -140,12 +198,14 @@ class ImagesController extends Controller
     }
 
     private function getRandomName($length = 10) {
-    $characters = '0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ';
-    $charactersLength = strlen($characters);
-    $randomString = '';
-    for ($i = 0; $i < $length; $i++) {
-        $randomString .= $characters[rand(0, $charactersLength - 1)];
+        $characters = '0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ';
+        $charactersLength = strlen($characters);
+        $randomString = '';
+        for ($i = 0; $i < $length; $i++) {
+            $randomString .= $characters[rand(0, $charactersLength - 1)];
+        }
+        return $randomString;
     }
-    return $randomString;
-}
+
+    
 }

@@ -380,15 +380,15 @@ function savePDF() {
 
 $(document).ready(function() {
     setTimeout(function() {
-        $('.button-nav').height($('.button-nav').height());
+       // $('.button-nav').height($('.button-nav').height());
     }, 300);
 
 })
 
 
 $(window).resize(function() {
-    $('.button-nav').attr('style','height:auto');    
-    $('.button-nav').height($('.button-nav').height());
+    //$('.button-nav').attr('style','height:auto');    
+    //$('.button-nav').height($('.button-nav').height());
 })
 
 function showDrop() 

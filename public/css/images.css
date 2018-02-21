@@ -7,6 +7,7 @@
     width: 275px !important;
     height: 180px !important;
     overflow: hidden !important;
+    cursor: pointer;
 }
 .thumbnail img {
     height: 170px !important;

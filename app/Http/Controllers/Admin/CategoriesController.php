@@ -5,9 +5,14 @@ namespace App\Http\Controllers\Admin;
 use Illuminate\Http\Request;
 use App\Http\Controllers\Controller;
 use App\Category;
+use Illuminate\Support\Facades\Auth;
 
 class CategoriesController extends Controller
 {
+    public function __construct()
+    {
+        $this->middleware('permission:read-upload');
+    }
     /**
      * Display a listing of the resource.
      *
@@ -38,9 +43,19 @@ class CategoriesController extends Controller
      */
     public function store(Request $request)
     {
-        $category = new Category;
-        $category->name = e($request->name);
-        if ($category->save()) return 1;
+        $user = Auth::user();
+        $category = Category::
+            where(function($q) use ($user) {
+                if (!$user->hasRole('administrator')) $q->where('user_id', $user->id);
+            })
+            ->orWhere('name', e($request->name))
+            ->count();
+        if (!$category) {
+            $category = new Category;
+            $category->name = e($request->name);
+            $category->user_id = $user->id;
+            if ($category->save()) return 1;
+        } 
         return 0;
     }
 
@@ -83,6 +98,7 @@ class CategoriesController extends Controller
      */
     public function update(Request $request, $id)
     {
+        if (Category::where('name', e($request->name))->count()) return 0;
         $category = Category::find($id);
 
         $category->name = e($request->name);

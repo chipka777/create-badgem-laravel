@@ -39,9 +39,10 @@ Vue.component('images', {
             this.getImages();
             this.getCountOfImages();
         },
+        
         getImages: function(offset = this.offset, cat_id = this.cat_id,  count = this.perPage) {
             this.showLoader();
-            this.$http.get('/api/v1/images/all/' + cat_id + '/' + count + '/' + offset).then(response => {
+            this.$http.get('/api/v1/images/by-user/' + cat_id + '/' + count + '/' + offset).then(response => {
                 var images = response.data;
                 var ln = images.length;
                 var counter = 0;
@@ -72,7 +73,7 @@ Vue.component('images', {
         },
         getCountOfImages: function(cat_id = this.cat_id) {
             $('.image-pagination').hide();
-            this.$http.get('/api/v1/images/count/' + cat_id).then(response => {
+            this.$http.get('/api/v1/images/count-by-user/' + cat_id).then(response => {
                 this.pageCount = Math.floor(response.body/this.perPage);
                 $('.image-pagination').css('display', 'flex');
             }, response => {
@@ -102,7 +103,7 @@ Vue.component('images', {
             });
         },
         paginateCallBack: function(pageNum) {
-            this.offset = pageNum * this.perPage;
+            this.offset = (pageNum * this.perPage) - this.perPage;
             this.currentPage = pageNum;
             this.getImages();
         },

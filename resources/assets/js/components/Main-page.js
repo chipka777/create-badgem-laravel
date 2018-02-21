@@ -17,6 +17,7 @@ Vue.component('main-page', {
             bitcoinData: {},
             section: false,
             animation: false,
+            loading: false,
         }
     },
     mounted: function() {
@@ -170,11 +171,13 @@ Vue.component('main-page', {
             $('.canvas-mask').fadeIn('slow');
             $('.canvas-loader').fadeIn('slow');
             $('.canvas>.canva-img').each(function (num,item) {
+                val = $(this).children('img').attr('src');
+                src = "upload/" + val.substring(val.lastIndexOf('/')+1,val.length);
                 image = {
                     'height': ((Math.round($(this).height() / $(this).parent().height() * 100) * 768)/100),
                     'width': ((Math.round($(this).width() / $(this).parent().width() * 100) * 1152)/100),
                     'rotate': getRotationDegrees($(this)),
-                    'src': $(this).children('img').attr('src'),
+                    'src': src, 
                     'top': ((Math.round(Number($(this).css('top').slice(0, -2)) / $(this).parent().height() * 100) * 768)/100),
                     'left': ((Math.round(Number($(this).css('left').slice(0, -2)) / $(this).parent().width()  * 100) * 1152)/100)
                 };
@@ -193,9 +196,7 @@ Vue.component('main-page', {
         },
 
         getBicoinCash: function() {
-
         if (this.bitcoinData.bid) {return false};
-
             this.hideBtc();
             this.$http.get('/api/v1/bitcoins/ticker').then(response => {
                 this.bitcoinData = response.body;
@@ -219,6 +220,7 @@ Vue.component('main-page', {
         },
 
         hideBtc: function() {
+            $('.button-nav').css('position', 'absolute').hide();
             $('#bitcoin-section').hide();
             setTimeout(function() {
                 $('.preloader').fadeIn('slow');
@@ -255,8 +257,8 @@ Vue.component('main-page', {
         },
 
         showSection: function(section, left) {
-            if (this.animation) return false;
 
+            if (this.animation) return false;
             this.animation = true;
 
             if (this.sections[section]) {
@@ -272,19 +274,23 @@ Vue.component('main-page', {
 
             this.sections[section] = true;
 
-            showSection = section + '-section';
+            var selectSection = section + '-section';
             section += '-nav';
             left = left + '%';
 
             $('.button-sections').css('z-index', 2);
 
-            $('.button-nav').children('div:not(#' + section + ')').animate({opacity: 0}, 1000);
+            //hide buttons nav
+            $('.button-nav').css({'position':'absolute', 'display': 'none'});
+            
+            $('.button-nav').children('div:not(#' + section + ')').animate({opacity: 0}, 500);
+            $('#' + section).animate({'left': left}, 1000).animate({opacity: 0}, 800);
 
-            $('#' + section).animate({'top': '-58%'}, 500).animate({ 'left': left}, 500).css('z-index', 100);
+           // $('#' + section).animate({'top': '-58%'}, 500).animate({ 'left': left}, 500).css('z-index', 100);
 
             var self = this;
             setTimeout(function() {
-                $('#' + showSection).fadeIn('slow');
+                $('#' + selectSection).fadeIn('slow');
                 self.animation = false;
             }, 2000);
 
@@ -325,14 +331,11 @@ Vue.component('main-page', {
 
             date = date.getDate() + '-' + date.getMonth() + '-' + date.getFullYear();
             
-            $('body').prepend('<div id="tooltip" style="'+style+'">Created: '+ date +' <br/> Author: '+img.user+' <br/> Favorited : 0</div>');
+            $('body').prepend('<div id="tooltip" style="'+style+'">Created: '+ date +' <br/> Author: '+img.user+' <br/> Favorited : '+img.favorited+'</div>');
 
             $('html').on('mousemove', function(event) {
                 $('#tooltip').css({'top': event.pageY + 10, 'left': event.pageX + 10});
             });
-
-            
-          
         },
 
         hideToolTip: function(event, index) {
@@ -340,6 +343,155 @@ Vue.component('main-page', {
             $('html').off('mousemove');
 
             $('#tooltip').remove();
+        },
+
+        showRegister: function() {
+            //$('#members-section').animate({opacity: 0}, 1000);
+            $('#members-section').animate({ opacity: 1}, 1000).hide();
+
+            setTimeout(function() {
+                $('#register-section').fadeIn();
+           }, 550);
+        },
+
+        showRegisterActivate: function() {
+            //$('#register-section').animate({opacity: 0}, 1000);
+
+            $('#register-section').animate({ opacity: 0 }, 1000).hide();
+
+            setTimeout(function() {
+                $('#register-active-section').fadeIn();
+           }, 550);
+        },
+
+        hideRegisterActivate: function() {
+            $('#register-active-section').animate({ opacity: 0 }, 1000).hide();
+
+            setTimeout(function() {
+                $('#members-section').fadeIn();
+           }, 550);
+        },
+
+        loginUser: function(form) {
+            this.loading = true;
+
+            var data = new FormData();
+
+
+            data.append('email', $(form).find('input[name="email"]').val());
+            data.append('password', $(form).find('input[name="password"]').val());
+            data.append('remember', $(form).find('input[name="remember"]').val());
+            
+
+            this.$http.post('/login', data).then(response => {
+                this.loading = false;                
+                var status = response.body.status;
+
+                if (status == "OK") {
+                    this.$notify.success({
+                        title: 'Success',
+                        message: 'You have successfully entered',
+                        duration: 10000,
+                      });
+                    
+                      window.location.href = "/dashboard";
+                    
+                } else {
+                    this.$notify.error({
+                        title: 'Error',
+                        message: response.body.errors,
+                        duration: 10000,
+                      });
+                }
+            }, response => {
+                this.loading = false;                                
+                this.$notify.error({
+                    title: 'Error',
+                    message: 'Some error with login api',
+                    duration: 10000,
+                  });
+            });
+        },
+
+        registerUser: function(form) {
+            this.loading = true;
+
+            var data = new FormData();
+
+            data.append('name', $(form).find('input[name="name"]').val());
+            data.append('first_name', $(form).find('input[name="first_name"]').val());
+            data.append('last_name', $(form).find('input[name="last_name"]').val());
+            data.append('email', $(form).find('input[name="email"]').val());
+            data.append('password', $(form).find('input[name="password"]').val());
+            data.append('password_confirmation', $(form).find('input[name="password_confirmation"]').val());
+            
+            this.$http.post('/register', data).then(response => {
+                this.loading = false;
+                var status = response.body.status;
+
+                if (status == "OK") {
+                    this.$notify.success({
+                        title: 'Success',
+                        message: 'Enter the code you receive on the email',
+                        duration: 10000,
+                      });
+                    this.showRegisterActivate();
+                } else {
+                    this.$notify.error({
+                        title: 'Error',
+                        message: response.body.errors,
+                        duration: 10000,
+                      });
+                }
+            }, response => {
+                this.loading = false;
+
+                this.$notify.error({
+                    title: 'Error',
+                    message: 'Some error with register api',
+                    duration: 10000,
+                  });
+            });
+           /* this.$http.post('/register', {'images': images}).then(response => {
+                a = window.location.replace("http://create.badge-m.com/download");
+                $('.canvas-mask').fadeOut('slow');
+                $('.canvas-loader').fadeOut('slow');
+            }, response => {
+                console.log('Some error with images api!');
+            });*/
+        },
+
+        activateAccount: function() {
+            this.loading = true;
+            var code = $('input[name="code"]').val();
+            this.$http.post('/activate', {code: code}).then(response => {
+                this.loading = false;
+                var status = response.body.status;
+
+                if (status == "OK") {
+                    this.$notify.success({
+                        title: 'Success',
+                        message: 'Your account has been successfully activated',
+                        duration: 10000,
+                      });
+
+                    this.hideRegisterActivate();
+                } else {
+                    this.$notify.error({
+                        title: 'Error',
+                        message: 'You entered an invalid code by try again',
+                        duration: 10000,
+                      });
+                }
+            }, response => {
+                this.loading = false;
+
+                this.$notify.error({
+                    title: 'Error',
+                    message: 'Some error with register api',
+                    duration: 10000,
+                  });
+            });
         }
     }
 }) 

@@ -5,17 +5,20 @@ namespace App\Http\Controllers;
 use Illuminate\Http\Request;
 use App\Image;
 use App\Category;
+use Mail;
+use App\User;
 
 class MainController extends Controller
 {
     public function index()
     {
-        $user =  \App\User::first();
-        $user->password = bcrypt('admin');
-        $user->save();
-        $images = Image::where('approved', 1)->where('cat_id', 0)->limit(8)->get();
-        $categories = Category::all();
+       /* $user = User::find(1);
+        Mail::send('emails.registerCode', ['user' => $user], function ($m) use ($user) {
+            $m->from('hello@app.com', 'Your Application');
 
-        return view('main', compact('images', 'categories'));
+            $m->to('illya.lopatko@gmail.com', $user->name)->subject('Your Reminder!');
+        });*/
+
+        return view('main');
     }
 }
