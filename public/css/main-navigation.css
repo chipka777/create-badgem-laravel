@@ -22,7 +22,7 @@
 	flex-basis: 35%;
 	min-height: 300px;
 	height: 40vh;
-	font-family: Adorable, sans-serif;
+	font-family: Adorable_2, sans-serif;
 	background: #fff url(../img/back-menu.png) center;
 	background-size: 150%;
     border-radius: 40px;
@@ -359,12 +359,16 @@ animation-delay: .8s;
 	background-color: #fff;
 }
 
-#members-section .login-btn {
+#members-section .login-btn,
+#register-section .back-btn,
+#register-active-section .back-btn {
 	background-color: #fff;
     color: #000;
 }
 
-#members-section .login-btn:hover {
+#members-section .login-btn:hover,
+#register-section .back-btn:hover,
+#register-active-section .back-btn:hover {
 	color: #fff;
 	background-color: #000;
 }

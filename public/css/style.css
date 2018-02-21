@@ -8,6 +8,9 @@
     src: url(../fonts/Adorable.otf);
 }
 
+[v-cloak] > * { display:none; }
+
+
 html, body {
 	margin: 0;
 	padding: 0;

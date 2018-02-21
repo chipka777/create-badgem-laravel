@@ -11,23 +11,19 @@
 |
 */
 
-Route::get('/', 'MainController@index')->name('main');
-
-/*Route::get('/script', function() {
-    $images = \App\Image::all();
-
-    foreach($images as $image) {
-        var_dump(exec('convert "upload/' . $image->name . '"  -trim "upload/' . $image->name . '"'));
-        echo "<br>";
-    }
-});*/
-
 Auth::routes();
+
 Route::post('/activate', 'Auth\\RegisterController@activate');
+
+Route::group(['middleware' => 'auth'], function () {
+    Route::get('/', 'MainController@index')->name('main');
+    Route::get('/download', 'DownloadController@getBadgem');
+});
 
 Route::group(['middleware' => 'role:administrator'], function() {
     Route::post('/user/send-invite', 'Admin\\UsersController@sendInvite'); 
 });
+
 
 Route::group(['prefix' => 'dashboard', 'namespace' => 'Admin', 'middleware' => 'auth'], function() {
     Route::get('/', 'DashboardController@index')->name('admin');
@@ -69,4 +65,3 @@ Route::group(['namespace' => 'API', 'prefix' => 'api/v1'], function() {
     
 });
 
-Route::get('/download', 'DownloadController@getBadgem');

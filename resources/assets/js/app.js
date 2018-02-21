@@ -28,6 +28,7 @@ require('./components/Images-create');
 require('./components/Admin-users');
 require('./components/Notification');
 require('./components/History');
+require('./components/site/login-page');
 
 
 
