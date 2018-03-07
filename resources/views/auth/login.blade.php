@@ -6,10 +6,17 @@
         <div class="main-navigation-wrap">
             <div class="main main-navigation"  v-loading="loading">
                 <div id="members-section" v-if="currentSection == 'login'">
-                    <span class="title">MEMBERS</span>
+                    <span class="title">HELLO, welcome to Badge`m </br> Would you like to?</span>
                     <form class="form-member-post" method="POST" action="{{ route('login') }}">
                         {{ csrf_field() }}
-                    
+                        <div class="member-form-buttons">
+                            <div class="form-group">
+                                <input class="member-submit login-btn" type="button" value="LOGIN" @click="login">
+                            </div>
+                            <div class="form-group">
+                                <input class="member-submit" type="button" value="REGISTER" @click="activeUser ? currentSection = 'activate' : currentSection = 'register'">
+                            </div>
+                        </div>
                         <div class="member-form">                                   
                             <div class="form-group">
                                 <input type="email" v-model="loginForm.email" name="email" placeholder="E-MAIL" value="" required>
@@ -20,14 +27,6 @@
                             <div class="form-group check-box">
                                 <label class="check-label">REMEMBER ME
                                 <input class="member-check" v-model="loginForm.remember"  name="remember" type="checkbox"></label>
-                            </div>
-                        </div>
-                        <div class="member-form-buttons">
-                            <div class="form-group">
-                                <input class="member-submit login-btn" type="button" value="LOGIN" @click="login">
-                            </div>
-                            <div class="form-group">
-                                <input class="member-submit" type="button" value="REGISTER" @click="activeUser ? currentSection = 'activate' : currentSection = 'register'">
                             </div>
                         </div>
                     </form>
