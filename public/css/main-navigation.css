@@ -645,3 +645,54 @@ animation-delay: .8s;
     transform: scale3d(1, 1, 1)
   }
 }
+
+.head-navigation {
+	display: flex;
+    width: 90%;
+    justify-content: flex-end;
+    flex-wrap: wrap;
+    z-index: 1;
+    position: absolute;
+    top: 3%;
+}
+
+.head-navigation div {
+	margin-left: 10px;
+}
+
+.head-navigation .logout {
+	background: #ffffff url(../img/head-menu/logout.png) no-repeat center;
+    background-size: 68%;
+    box-shadow: 0px 0px 7px 3px rgba(53, 84, 36, 0.5);
+    border-radius: 50%;
+    cursor: pointer;
+    flex-basis: 9%;
+    position: relative;
+    padding: .05rem 0;
+}
+
+.head-navigation .upload {
+	background: #ffffff url(../img/head-menu/uploads.png) no-repeat center;
+    background-size: 68%;
+    box-shadow: 0px 0px 7px 3px rgba(53, 84, 36, 0.5);
+    border-radius: 50%;
+    cursor: pointer;
+    flex-basis: 9%;
+    position: relative;
+    padding: .05rem 0;
+}
+
+.head-navigation div:hover {
+	box-shadow: 0px 0px 7px 3px rgba(0, 176, 255, 0.5);
+}
+
+.head-navigation .logout:before,
+.head-navigation .upload:before {
+	content: '';
+    display: block;
+    padding-bottom: 100%;
+}
+
+.popover-adorable {
+	padding: 10px !important;
+}
