@@ -49,8 +49,31 @@ const app = new Vue({
     el: '#app',
     data: {
     },
-    beforeMount: function() {
+    mounted: function() {
+        this.setActivity();
+        this.checkActivity();
     },
     methods: {
+        setActivity: function() {
+            Vue.http.post('/api/v1/set-activity').then(response => {
+
+            }, response => {
+                console.log('Some error with activity api!');
+            });
+        },
+        checkActivity: function() {
+            var self = this;
+            var global = window;
+            setInterval(function() {
+                self.$http.get('/api/v1/check-activity').then(response => {
+                    if (response.body.status === 'logout'){
+                        global.location = '/';
+                    }
+
+                }, response => {
+                    console.log('Some error with activity api!');
+                });
+            }, 300000);
+        }
     }
 });

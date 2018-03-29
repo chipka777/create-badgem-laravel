@@ -19,6 +19,15 @@ Vue.component('main-page', {
             animation: false,
             loading: false,
             memberStatus: '',
+            updateDate: Date.now()
+        }
+    },
+    beforeUpdate: function() {
+        var differenceTime = Date.now() - this.updateDate;
+
+        if (differenceTime > 60000) {
+            this.updateDate = Date.now();            
+            this.$parent.$options.methods.setActivity();
         }
     },
     mounted: function() {

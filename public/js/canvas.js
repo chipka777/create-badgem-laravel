@@ -113,6 +113,12 @@ function panelImg(e,elem) {
 
         $(document).on('mouseup', function() {
             $('html').off('mousemove');
+            /*obj.attr('style', '');
+            showMain(prev);
+            hideDrop();
+            $(document).off("mouseup");*/
+            
+            
              main_flag = false;
              if (!canvas_enable){
                     status = checkPosition(elem, $(".main"));
@@ -150,6 +156,7 @@ function panelImg(e,elem) {
             showMain(prev);
             hideDrop();
             $(document).off("mouseup");
+          
             
         });
     }
@@ -395,14 +402,18 @@ function showDrop()
 {
     $('.button-nav').hide();
     $('.button-sections').hide();
+    $('.main-navigation-body').hide();    
+    $('.main-navigation-header').hide();      
     $('.spiral-nav').hide();
-    $('.drop-me').fadeIn('slow');
+    $('.drop-me').css('display','flex').fadeIn('slow');
 }
 
 function hideDrop()
 {
     $('.button-nav').fadeIn('slow');
     $('.button-sections').css('display','flex').fadeIn('slow');
+    $('.main-navigation-body').fadeIn('slow');  
+    $('.main-navigation-header').fadeIn('slow');  
     $('.spiral-nav').fadeIn('slow');
     $('.drop-me').hide();
 }

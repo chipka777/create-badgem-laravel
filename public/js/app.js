@@ -14701,18 +14701,40 @@ __webpack_require__(84);
 //Vue.component('categories', require('./components/Categories.js'));
 Vue.http.headers.common['X-CSRF-TOKEN'] = document.head.querySelector('meta[name="csrf-token"]').content;
 Vue.http.interceptors.push(function (request, next) {
-  request.credentials = true;
-  next();
+    request.credentials = true;
+    next();
 });
 
 Vue.use(__WEBPACK_IMPORTED_MODULE_0_element_ui___default.a);
 
 var app = new Vue({
-  components: {},
-  el: '#app',
-  data: {},
-  beforeMount: function beforeMount() {},
-  methods: {}
+    components: {},
+    el: '#app',
+    data: {},
+    mounted: function mounted() {
+        this.setActivity();
+        this.checkActivity();
+    },
+    methods: {
+        setActivity: function setActivity() {
+            Vue.http.post('/api/v1/set-activity').then(function (response) {}, function (response) {
+                console.log('Some error with activity api!');
+            });
+        },
+        checkActivity: function checkActivity() {
+            var self = this;
+            var global = window;
+            setInterval(function () {
+                self.$http.get('/api/v1/check-activity').then(function (response) {
+                    if (response.body.status === 'logout') {
+                        global.location = '/';
+                    }
+                }, function (response) {
+                    console.log('Some error with activity api!');
+                });
+            }, 300000);
+        }
+    }
 });
 
 /***/ }),
@@ -27045,8 +27067,17 @@ Vue.component('main-page', {
             section: false,
             animation: false,
             loading: false,
-            memberStatus: ''
+            memberStatus: '',
+            updateDate: Date.now()
         };
+    },
+    beforeUpdate: function beforeUpdate() {
+        var differenceTime = Date.now() - this.updateDate;
+
+        if (differenceTime > 60000) {
+            this.updateDate = Date.now();
+            this.$parent.$options.methods.setActivity();
+        }
     },
     mounted: function mounted() {
         this.getCategories();
@@ -27760,7 +27791,7 @@ Vue.component('images', {
 
             $('.image-pagination').hide();
             this.$http.get('/api/v1/images/count-by-user/' + cat_id).then(function (response) {
-                _this3.pageCount = Math.floor(response.body / _this3.perPage);
+                _this3.pageCount = Math.ceil(response.body / _this3.perPage);
                 $('.image-pagination').css('display', 'flex');
             }, function (response) {
                 console.log('Some error with images api!');
@@ -27948,7 +27979,7 @@ Vue.component('images-show', {
 
             $('.image-pagination').hide();
             this.$http.get('/api/v1/images/count/' + cat_id).then(function (response) {
-                _this3.pageCount = Math.floor(response.body / _this3.perPage);
+                _this3.pageCount = Math.ceil(response.body / _this3.perPage);
                 $('.image-pagination').css('display', 'flex');
             }, function (response) {
                 console.log('Some error with images api!');
@@ -28095,7 +28126,7 @@ Vue.component('images-favorite', {
 
             $('.image-pagination').hide();
             this.$http.get('/api/v1/images/count/' + cat_id).then(function (response) {
-                _this3.pageCount = Math.floor(response.body / _this3.perPage);
+                _this3.pageCount = Math.ceil(response.body / _this3.perPage);
                 $('.image-pagination').css('display', 'flex');
             }, function (response) {
                 console.log('Some error with images api!');
@@ -28519,6 +28550,9 @@ Vue.component('login-page', {
             },
             activateForm: {
                 code: ''
+            },
+            forgottenForm: {
+                email: ''
             }
         };
     },
@@ -28641,6 +28675,40 @@ Vue.component('login-page', {
                 _this3.$notify.error({
                     title: 'Error',
                     message: 'Some error with register api',
+                    duration: 10000
+                });
+            });
+        },
+
+        forgottenPassword: function forgottenPassword() {
+            var _this4 = this;
+
+            this.loading = true;
+
+            this.$http.post('/password-recovery', { email: this.forgottenForm.email }).then(function (response) {
+                _this4.loading = false;
+                var status = response.body.status;
+
+                if (status == "OK") {
+                    _this4.$notify.success({
+                        title: 'Success',
+                        message: 'The new password was successfully sent to the email address',
+                        duration: 10000
+                    });
+                    _this4.currentSection = 'login';
+                } else {
+                    _this4.$notify.error({
+                        title: 'Error',
+                        message: response.body.errors,
+                        duration: 10000
+                    });
+                }
+            }, function (response) {
+                _this4.loading = false;
+
+                _this4.$notify.error({
+                    title: 'Error',
+                    message: 'Some error with password recovery api',
                     duration: 10000
                 });
             });

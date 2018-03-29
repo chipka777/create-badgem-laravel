@@ -76,7 +76,7 @@ Vue.component('images-show', {
         getCountOfImages: function(cat_id = this.cat_id) {
             $('.image-pagination').hide();
             this.$http.get('/api/v1/images/count/' + cat_id).then(response => {
-                this.pageCount = Math.floor(response.body/this.perPage);
+                this.pageCount = Math.ceil(response.body/this.perPage);
                 $('.image-pagination').css('display', 'flex');
             }, response => {
                 console.log('Some error with images api!');

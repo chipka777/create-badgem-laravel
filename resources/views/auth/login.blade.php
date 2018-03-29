@@ -25,8 +25,9 @@
                                 <input type="password" v-model="loginForm.password" name="password" placeholder="PASSWORD" required>
                             </div>
                             <div class="form-group check-box">
-                                <label class="check-label">REMEMBER ME
+                                <label class="check-label remember-btn">REMEMBER ME
                                 <input class="member-check" v-model="loginForm.remember"  name="remember" type="checkbox"></label>
+                                <a class="forgotten-btn"  @click="currentSection = 'forgotten'">Forgot password?</a>
                             </div>
                         </div>
                     </form>
@@ -88,6 +89,26 @@
                                 </div>
                             </div>
                     </form>    
+                </div>
+                <div id="register-active-section" v-if="currentSection == 'forgotten'">
+                    <form class="form-member-post" method="POST" action="">
+                        <div class="register-active-wrap">
+                            <div class="member-form">
+                                <span class="title">Enter your E-mail</span>
+                                <div class="form-group">
+                                    <input type="email" v-model="forgottenForm.email" name="email" required>
+                                </div>
+                            </div>
+                        </div> 
+                        <div class="member-form-buttons">
+                                <div class="form-group">
+                                    <input class="member-submit back-btn" type="button" value="Back" @click="currentSection = 'login'" >
+                                </div>
+                                <div class="form-group">
+                                    <input class="member-submit" type="button" value="Send" @click="forgottenPassword">
+                                </div>
+                            </div>
+                    </form>   
                 </div>
             </div>
         </div>

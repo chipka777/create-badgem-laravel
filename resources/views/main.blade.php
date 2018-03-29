@@ -4,99 +4,66 @@
     <div id="app">
         <main-page inline-template>
             <div>
-                <el-popover
-                    popper-class="popover-adorable"
-                    ref="upload"
-                    placement="top-start"
-                    width="140"
-                    trigger="hover"
-                    content="In this section you can upload your unique designs">
-                </el-popover>
-                <el-popover
-                    popper-class="popover-adorable"
-                    ref="logout"
-                    placement="right-start"
-                    width="70"
-                    trigger="hover"
-                    content="Logout. Goodbye!">
-                </el-popover>
                 <div class="main-navigation-wrap">
-                    <div class="main main-navigation"  v-loading="loading" @mouseenter="hoverMenu" @mouseleave="unhoverMenu">
-                        <span @click="openHome"><img class="menu-home-btn" src="{{ asset('img/top-menu.png') }}"></span>
-                        <div class="preloader text-center">
-                            <div id="preloader_1">
-                                <span></span>
-                                <span></span>
-                                <span></span>
-                                <span></span>
-                                <span></span>
+                    <div class="main-menu-layer1">
+                        <div class="insta-menu animated"></div>
+                        <div class="fire-menu animated"></div>   
+                        <div class="rocket-menu animated"></div>                                                                     
+                    </div>
+                    <div class="main main-navigation-2"  v-loading="loading" @mouseenter="hoverMenu" @mouseleave="unhoverMenu">
+                        <div class="row main-navigation-header">
+                            <div class="col-md-9 welcome-text">
+                                Hello, {{ Auth::user()->name }}!
                             </div>
-                        </div> 
-                        
-                        <div class="head-navigation">
-                            <div v-popover:upload class="upload"></div>                            
-                            <div v-popover:logout class="logout" onclick="event.preventDefault(); document.getElementById('logout-form').submit();">
-                                <form id="logout-form" action="{{ route('logout') }}" method="POST" style="display: none;">{{ csrf_field() }}</form>
+                            <div class="col-md-3 pull-right message ">
+                                <img class="col-md-6 message-image animated" src="{{ asset('img/msg-phase2.png') }}" />
+                                <span class="message-text col-md-6">
+                                    (3)
+                                </span>
                             </div>
-                        </div>
-                        <div class="button-sections">
-                            <div id="bitcoin-section" class="col-md-4" >
-                                <p><span class="title">Bitcoin</span></p>
-                                <p>
-                                Last -  <span v-if="bitcoinData">@{{ Math.round(parseFloat(bitcoinData.last) * 100) / 100 }}$</span>
-                                </p>
-                                <p>
-                                Bid -  <span v-if="bitcoinData">@{{ Math.round(parseFloat(bitcoinData.bid) * 100) / 100 }}$</span>
-                                </p>
-                                <p>
-                                High -  <span v-if="bitcoinData">@{{ Math.round(parseFloat(bitcoinData.high) * 100) / 100 }}$</span>
-                                </p>
 
+                        </div>    
+                        <div class="row main-navigation-body">
+                            <div class="row">
+                                <div class="col-md-6 bulletin ">
+                                    <img class="col-md-4 bulletin-image animated" src="{{ asset('img/bulletin-phase2.png') }}" />
+                                    <span class="bulletin-text col-md-6">
+                                        Bulletin
+                                    </span>
+                                </div>
+                                <div class="col-md-6 creations  pull-right">
+                                    <img class="col-md-4 creations-image animated" src="{{ asset('img/creations-phase2.png') }}" />
+                                    <span class="creations-text col-md-6">
+                                        Creations
+                                    </span>
+                                </div>
                             </div>
-                            <div id="category-section" >
-                                <span class="title">Category Search</span>
-                                <div class="select-box">
-                                    <select id="select-cat" class="category-selecter" name="searchCate" @change="getImages($event.target.value, 70, true)">
-                                        <option value="0">All</option>
-                                        @if (Auth::user())
-                                            <option value="favorited">Favorited</option>   
-                                        @endif                                     
-                                        <option :value='category.id' v-for='category in categories'>@{{ category.name }}</option>
-                                    </select>
+                            <div class="row">
+                                <div class="col-md-6 favorites ">
+                                    <img class="col-md-4 favorites-image animated" src="{{ asset('img/favorites-phase2.png') }}" />
+                                    <span class="favorites-text col-md-6">
+                                        Favorites
+                                    </span>
+                                </div>
+                                <div class="col-md-6 history ">
+                                    <img class="col-md-4 history-image animated" src="{{ asset('img/history-phase2.png') }}" />
+                                    <span class="history-text col-md-6">
+                                        History
+                                    </span>
                                 </div>
                             </div>
                         </div>
-
-                        <div class="button-nav">
-                            <div id="insta-nav" class="menu-item animated" @click="getInstaImages"></div>
-                            <div id="bitcoin-nav" class="menu-item animated" @click="getBicoinCash"></div>    
-                            <div id="category-nav" class="menu-item animated" @click="showSection('category', -15)"></div>   
-                        </div>
-                        
-                        <div class="spiral-nav">
-                            <div class="spl-nav-left">
-                                <div class="spl-navig spl-self-nav" @click="spiralLeft">
-                                    <img src="img/self-left-nav.png" />
-                                </div>
-                                <div class="spl-navig spl-many-nav" @click="spiralManyLeft">
-                                    <img src="img/many-left-nav.png" />
-                                </div>  
-                            </div>
-                            <div class="spl-nav-right">
-                                <div class="spl-navig spl-many-nav-r" @click="spiralManyRight">
-                                    <img src="img/many-right-nav.png" />                          
-                                </div>
-                                <div class="spl-navig spl-self-nav-r" @click="spiralRight">
-                                    <img src="img/self-right-nav.png" />
-                                </div> 
-                            </div>  
-                        </div>
-                
                         <div class="drop-me">
                             <p>Drop me Here</p>
                         </div>
                     </div>
+                    <div class="main-menu-layer2">
+                        <div class="diamond-menu animated"></div>
+                        <div class="paint-menu animated"></div>       
+                        <div class="zoom-menu animated"></div>                                                                 
+                    </div>
                 </div>
+                
                
                 <div class="main-canvas">
                     
@@ -155,8 +122,6 @@
                         </div>
                     </div>
                 </div>
-                
-               
             </div>
        </main-page>
     </div>

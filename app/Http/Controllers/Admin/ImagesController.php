@@ -64,7 +64,7 @@ class ImagesController extends Controller
         if ($valid) {
             $path = public_path('upload');
             $extension = $request->files->get('image')->guessExtension();
-            $name = $this->getRandomName() . '.' . $extension;
+            $name = $this->getRandomName() . '.png';            
             
             $request->files->get('image')->move($path, $name);
            
@@ -74,7 +74,9 @@ class ImagesController extends Controller
 
             if ($wd > 400) exec("convert upload/$name -resize x400 upload/thumbs/$name");
             else exec("convert upload/$name upload/thumbs/$name");
-         
+
+            exec("convert clouds/cloud.png upload/thumbs/$name -gravity center -composite clouds/cloud.png -compose copyopacity -composite upload/thumbs/wcloud/$name");
+            exec("convert clouds/cloud-frame.png upload/thumbs/wcloud/$name -geometry +30+10 -composite upload/thumbs/wcloud/$name");
             $image = new Image;
 
             $image->name = $name;

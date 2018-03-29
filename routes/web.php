@@ -15,6 +15,8 @@ Auth::routes();
 
 Route::post('/activate', 'Auth\\RegisterController@activate');
 
+Route::post('/password-recovery', 'Auth\\ForgotPasswordController@recovery');
+
 Route::group(['middleware' => 'auth'], function () {
     Route::get('/', 'MainController@index')->name('main');
     Route::get('/download', 'DownloadController@getBadgem');
@@ -62,6 +64,7 @@ Route::group(['namespace' => 'API', 'prefix' => 'api/v1'], function() {
     Route::get('notifications/{offset}/{count}', 'Notifications\\MainController@getByCount');
     Route::get('notifications/set-as-read', 'Notifications\\MainController@setAsRead');
     Route::get('history/{offset}/{count}/{id}', 'History\MainController@getByCount');    
-    
+    Route::post('set-activity', 'ActivityController@setActivity');
+    Route::get('check-activity', 'ActivityController@checkActivity');
 });
 

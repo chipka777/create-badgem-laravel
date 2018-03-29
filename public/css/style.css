@@ -8,6 +8,11 @@
     src: url(../fonts/Adorable.otf);
 }
 
+@font-face {
+    font-family: Bubblegum;
+    src: url(../fonts/Bubblegum.ttf);
+}
+
 [v-cloak] > * { display:none; }
 
 
@@ -19,7 +24,7 @@ html, body {
 	overflow-x: hidden;
 	/*background: url(../img/badgem-blackbg.jpg) 0 0 repeat;*/
 	background-image: url(../img/main-back.png);
-	background-color: #fff7cf;
+	background-color: #000000;
 	background-size: cover;
 	width: 100%;
 	-moz-user-select: none;
@@ -839,12 +844,12 @@ width: 28%;
 .pos1 {
 	display: table-cell;
 	top: 66%;
-	left: 72%;
+	left: 77%;
 }
 .pos2 {
 	display: table-cell;
 	top: 66%;
-	left: 47%;
+	left: 51%;
 }
 .pos3 {
 	display: table-cell;
@@ -874,21 +879,21 @@ width: 28%;
 .pos8 {
 	display: table-cell;
 	top: -5%;
-	left: 47%;
+	left: 51%;
 }
 .pos9 {
 	display: table-cell;
-	left: 72%;
+	left: 77%;
 	top: -5%;
 }
 .pos10 {
 	display: table-cell;
-	left: 72%;
+	left: 77%;
 	top: 30%;
 }
 .pos11 {
 	display: table-cell;
-	left: 72%;
+	left: 77%;
 	top: 100%;
 }
 
@@ -1035,9 +1040,9 @@ button:focus {
 }
 
 .canva-img img {
-	width: 38%;
+	width: 40%;
 	top: 52%;
-	left: 29%;
+	left: 28%;
 }
 .border img {
 	border: 1px solid #d4cfcf;

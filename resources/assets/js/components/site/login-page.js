@@ -20,6 +20,9 @@ Vue.component('login-page', {
             },
             activateForm: {
                 code: '',
+            },
+            forgottenForm: {
+                email: '',
             }
         }
     },
@@ -141,6 +144,38 @@ Vue.component('login-page', {
                   });
             });
         },
+
+        forgottenPassword: function () {
+            this.loading = true;
+
+            this.$http.post('/password-recovery', {email: this.forgottenForm.email}).then(response => {
+                this.loading = false;
+                var status = response.body.status;
+
+                if (status == "OK") {
+                    this.$notify.success({
+                        title: 'Success',
+                        message: 'The new password was successfully sent to the email address',
+                        duration: 10000,
+                      });
+                    this.currentSection = 'login';
+                } else {
+                    this.$notify.error({
+                        title: 'Error',
+                        message: response.body.errors,
+                        duration: 10000,
+                      });
+                }
+            }, response => {
+                this.loading = false;
+
+                this.$notify.error({
+                    title: 'Error',
+                    message: 'Some error with password recovery api',
+                    duration: 10000,
+                  });
+            });
+        }
 
     }
 }) 
