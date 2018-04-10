@@ -143,11 +143,21 @@ function panelImg(e,elem) {
             (img.left + img_w) > canvas.left       &&
             img.left < (canvas.left + canvas_w) ) status =  1;
             if (status) {
-                setLast(obj.clone().appendTo(".canvas").addClass('border')
+
+                var newObject = obj.clone()
+                    .appendTo(".canvas")
+                    .addClass('border')
                     .append('<span class="img-control" onmousedown="resizeImg(event, $(this))"></span')
                     .append('<span class="img-control-delete" onmousedown="deleteImg(event, $(this))"><i class="fa fa-close fa-5" aria-hidden="true"></i></span')
-                    .children('img').addClass('border-active').removeClass('insta-img').attr('onmousedown', ''));
+                    .children('img')
+                    .addClass('border-active')
+                    .removeClass('insta-img')
+                    .attr('onmousedown', '');
+
+                setLast(newObject);
                 canvasImg();
+
+                setToHistory(newObject.attr('data-id'));
 
                 $('#bottom-nav').show();
             }
@@ -156,10 +166,27 @@ function panelImg(e,elem) {
             showMain(prev);
             hideDrop();
             $(document).off("mouseup");
-          
-            
         });
     }
+
+function setToHistory(id) {
+    $.ajax({
+	    type: 'POST',
+	    url: '/api/v1/set-to-history',
+	    data: { 
+            "id": id,
+            "_token": $('meta[name="csrf-token"]').attr('content'),
+        },
+		success: function(data, status)
+	    {
+            
+		},
+		error: function(data, status)
+		{
+		    console.log('Some error with set-to-history')
+		}
+	});	
+}
 
 var latest = false;
 var target = false;
@@ -181,7 +208,7 @@ function checkPosition(elem, parent = $(".canvas")) {
 
     return 0;
 }
-function canvasImg(obj) {
+function canvasImg() {
 
     $(".canvas>.border img").on("mousedown", function(e){
 

@@ -22,4 +22,11 @@ class Image extends Model
 
         return $images ? true : false;
     }
+
+    public function user()
+    {
+        return $this->belongsTo(User::class);
+    }
+
+   
 }

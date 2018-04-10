@@ -1,25 +1,19 @@
 Vue.component('main-page', {
     data: function () {
         return {
-            categories: [],
             images: [],
+            bulletins: [],
             offset: 0,
             flag: 0,
             flagMany: 0,            
             spiral: 0,
             insta: 0,
-            counter: 0,
-            itemsOnPage: 10,
             itemsTmp: 0,
             stop: 0,
-            instaProgress: 0,
-            sections: [],
-            bitcoinData: {},
-            section: false,
-            animation: false,
             loading: false,
-            memberStatus: '',
-            updateDate: Date.now()
+            updateDate: Date.now(),
+            currentSection: 'images',
+            currentType: 'images',            
         }
     },
     beforeUpdate: function() {
@@ -31,38 +25,32 @@ Vue.component('main-page', {
         }
     },
     mounted: function() {
-        this.getCategories();
         this.getImages();
-        
     },
     methods: {
-        getCategories: function() {
-            this.$http.get('/api/v1/categories').then(response => {
-                this.categories = response.data;
-            }, response => {
-                console.log('Some error with categories api!');
-            });
-        },
-
-        getImages: function(cat_id = 'all', count = 70, cat = false) {
-            if (cat) this.hideCat();
-           
+        getImages: function(cat_id = 'all', count = 70, cat = false) {           
             if (cat_id == '0') cat_id = 'all';
+            this.loading = true;
+            
+            this.hideToolTip();
 
             this.$http.get('/api/v1/images/' + cat_id + '/' + count + '/0').then(response => {
-               if (cat) this.showCat();
+                this.currentSection = 'images';
+                this.currentType = 'images';
+
                 this.images = response.data;
                 this.offset = 50;
+                this.loading = false;
+                
             }, response => {
+                this.loading = false;                
                 console.log('Some error with images api!');
             });
         },
 
-        getInstaImages: function () {
-            if (this.section) return false;
+        /*getInstaImages: function () {
             this.hideNav();
             
-
             this.$http.post('/api/v1/images/instagram').then(response => {
                 this.insta = 1;
                 this.images = response.data;
@@ -72,18 +60,17 @@ Vue.component('main-page', {
             }, response => {
                 console.log('Some error with instagram images api!');
             });
-        },
+        },*/
 
         setImageToPanels: function(last, cat_id = 'all') {
             if (this.flag || this.stop) return false;
 
             this.flag = 1;
-            this.hideNav();
+            this.hideToolTip();
             
             this.$http.get('/api/v1/images/' + cat_id + '/20/' + this.offset).then(response => {
                 this.offset += 20;
                 if (response.data.length < 1) this.stop = 1;
-
 
                 images = response.data;                
                 last_num = this.images[this.images.length - 1].num;
@@ -93,16 +80,152 @@ Vue.component('main-page', {
                     ++last_num;
                     images[i].num = last_num;
                 }
-                images =  this.images.concat(images);
+                images = this.images.concat(images);
 
                 this.images = images;
 
                 this.flag = 0;
-                this.showNav();
                 this.spiralRight();
             }, response => {
                 console.log('Some error with images api!');
             });
+        },
+
+        homeLoad: function() {
+            this.getImages();
+            console.log('homeLoad');
+        },
+
+        bulletinLoad: function() {
+            this.loading = true;
+            this.hideToolTip();            
+            
+            this.$http.get('/api/v1/bulletin').then(response => {
+                if (response.body.status === "OK") {
+                    this.bulletins = response.body.bulletins;
+
+                    this.currentSection = 'bulletins';
+                    this.currentType = 'bulletins';                    
+                }else {
+                    this.$notify.error({
+                        title: 'Error',
+                        message: 'Some error with bulletins api',
+                        duration: 10000,
+                    });
+                }
+                
+                this.loading = false;
+             }, response => {
+                this.loading = false;    
+
+                this.$notify.error({
+                    title: 'Error',
+                    message: 'Some error with bulletins api',
+                    duration: 10000,
+                });
+             });
+        },
+
+        creationsLoad: function(count = 50) {
+            this.loading = true;
+            this.hideToolTip();            
+
+            if (this.currentType != 'creations') {
+                this.offset = 0;
+            }
+
+            this.$http.get('/api/v1/creations/' + count + '/' + this.offset).then(response => {
+                if (response.body.status === "OK") {
+                    this.images = response.body.images;
+
+                    this.currentSection = 'images';
+                    this.currentType = 'creations';
+                }else {
+                    this.$notify.error({
+                        title: 'Error',
+                        message: 'Some error with creations api',
+                        duration: 10000,
+                    });
+                }
+                
+                this.loading = false;
+             }, response => {
+                this.loading = false;    
+
+                this.$notify.error({
+                    title: 'Error',
+                    message: 'Some error with creations api',
+                    duration: 10000,
+                });
+             });
+        },
+
+        favoritesLoad: function(count = 50) {
+            this.loading = true;
+            this.hideToolTip();
+
+            if (this.currentType != 'favorites') {
+                this.offset = 0;
+            }
+
+            this.$http.get('/api/v1/favorites/' + count + '/' + this.offset).then(response => {
+                if (response.body.status === "OK") {
+                    this.images = response.body.images;
+
+                    this.currentSection = 'images';
+                    this.currentType = 'favorites';
+                }else {
+                    this.$notify.error({
+                        title: 'Error',
+                        message: 'Some error with favorites api',
+                        duration: 10000,
+                    });
+                }
+                
+                this.loading = false;
+             }, response => {
+                this.loading = false;    
+
+                this.$notify.error({
+                    title: 'Error',
+                    message: 'Some error with favorites api',
+                    duration: 10000,
+                });
+             });
+        },
+
+        historiesLoad: function(count = 50) {
+            this.loading = true;
+            this.hideToolTip();
+
+            if (this.currentType != 'histories') {
+                this.offset = 0;
+            }
+
+            this.$http.get('/api/v1/histories/' + count + '/' + this.offset).then(response => {
+                if (response.body.status === "OK") {
+                    this.images = response.body.images;
+
+                    this.currentSection = 'images';
+                    this.currentType = 'histories';
+                }else {
+                    this.$notify.error({
+                        title: 'Error',
+                        message: 'Some error with favorites api',
+                        duration: 10000,
+                    });
+                }
+                
+                this.loading = false;
+             }, response => {
+                this.loading = false;    
+
+                this.$notify.error({
+                    title: 'Error',
+                    message: 'Some error with favorites api',
+                    duration: 10000,
+                });
+             });
         },
 
         spiralRight: function() {
@@ -205,143 +328,11 @@ Vue.component('main-page', {
             });
         },
 
-        getBicoinCash: function() {
-        if (this.bitcoinData.bid) {return false};
-            this.hideBtc();
-            this.$http.get('/api/v1/bitcoins/ticker').then(response => {
-                this.bitcoinData = response.body;
-                this.showBtc();
-            }, response => {
-                console.log('Some error with images api!');
-            });
-
-        },
-        
-        hideNav: function() {
-            $('.button-nav').hide();
-            $('.spiral-nav').hide();
-            $('.preloader').fadeIn('slow');
-        },
-
-        showNav: function() {
-            $('.preloader').hide();
-            $('.button-nav').fadeIn('slow');
-            $('.spiral-nav').fadeIn('slow');
-        },
-
-        hideBtc: function() {
-            $('.menu-home-btn').hide();
-            $('.button-nav').css('position', 'absolute').hide();
-            $('#bitcoin-section').hide();
-            setTimeout(function() {
-                $('.preloader').fadeIn('slow');
-            }, 1000);
-        },
-
-        showCat: function() {
-           // setTimeout(function() {
-                $('.preloader').hide();
-                $('#category-section').fadeIn('slow');
-             //}, 1000);
-             
-        },
-
-        hideCat: function() {
-            $('#category-section').hide();
-            //setTimeout(function() {
-                $('.preloader').fadeIn('slow');
-           // }, 00);
-        },
-
-        showBtc: function() {
-        $('.button-sections').fadeIn('slow');            
-          setTimeout(function() {
-                $('.preloader').hide();
-                $('#bitcoin-section').fadeIn('slow');
-                $('.menu-home-btn').fadeIn('slow');           
-                
-            }, 1000);
-        },
-
-
-        showCanvas: function() {
-            $('.main-navigation').fadeOut();
-            $('.main-canvas').css("display", "flex")
-                            .hide()
-                            .fadeIn();
-        },
-
-        showSection: function(section, left) {
-            $('.menu-home-btn').hide();
-          
-            
-            ///if (this.sections[section]) {
-            //    this.hideSection(section);
-           //     return false;
-           // }
-
-           // if (this.section) return false;
-
-           // this.section = true;
-
-            if (section == 'bitcoin')  this.getBicoinCash();
-
-            //this.sections[section] = true;
-
-            var selectSection = section + '-section';
-            section += '-nav';
-
-            $('.button-sections').css('z-index', 2).fadeIn();
-
-            //hide buttons nav
-            $('.button-nav').css({'position':'absolute', 'display': 'none'});
-            
-            $('.button-nav').children('div:not(#' + section + ')').animate({opacity: 0}, 500);
-
-            if (this.memberStatus == 'register') return this.showRegister();
-            if (this.memberStatus == 'activate') return this.showRegisterActivate();
-
-            $('#' + section).animate({opacity: 0}, 0);
-
-           // $('#' + section).animate({'top': '-58%'}, 500).animate({ 'left': left}, 500).css('z-index', 100);
-
-            var self = this;
-            setTimeout(function() {
-                $('#' + selectSection).fadeIn('slow');
-                $('.menu-home-btn').fadeIn('slow');
-                
-            }, 2000);
-
-         
-            
-        },
-
-        hideSection: function(section) {
-            
-            this.section = false;
-
-            this.sections[section] = false;
-
-            showSection = section + '-section';
-            section += '-nav';
-            setTimeout(function() {
-                $('#' + showSection).fadeOut('slow');
-            }, 100);
-            $('.button-sections').css('z-index', 0);
-            $('.button-nav').children('div:not(#' + section + ')').animate({opacity: 1}, 1000);
-
-            $('#' + section).animate({'left': '0'}, 500).animate({ 'top': '0'}, 500).css('z-index', 1);
-
-             var self = this;
-
-            setTimeout(function() {
-                 self.animation = false;
-            }, 550);
-           
-        },
-
         showToolTip: function(event, index) {
             if (window.main_flag) return false;
+
+            console.log(event.target);
+
             var img = this.images[index];
 
             var style = "top:" + (event.pageY + 10) + 'px;left:' + (event.pageX + 10) + 'px;';
@@ -364,175 +355,5 @@ Vue.component('main-page', {
             $('#tooltip').remove();
         },
 
-        showRegister: function() {
-            this.memberStatus = 'register';
-            //$('#members-section').animate({opacity: 0}, 1000);
-            $('#members-section').animate({ opacity: 1}, 1000).hide();
-
-            setTimeout(function() {
-                $('#register-section').fadeIn().animate({ opacity: 1},0);
-                $('.menu-home-btn').fadeIn('slow');
-                
-           }, 550);
-        },
-
-        showRegisterActivate: function() {
-            this.memberStatus = 'activate';
-            
-            //$('#register-section').animate({opacity: 0}, 1000);
-
-            $('#register-section').animate({ opacity: 0 }, 1000).hide();
-
-            setTimeout(function() {
-                $('#register-active-section').fadeIn();
-                $('.menu-home-btn').fadeIn('slow');
-                
-           }, 550);
-        },
-
-        hideRegisterActivate: function() {
-            this.memberStatus = '';
-            
-            $('#register-active-section').animate({ opacity: 0 }, 1000).hide();
-
-            setTimeout(function() {
-                $('#members-section').fadeIn();
-           }, 550);
-        },
-
-        loginUser: function(form) {
-            this.loading = true;
-
-            var data = new FormData();
-
-
-            data.append('email', $(form).find('input[name="email"]').val());
-            data.append('password', $(form).find('input[name="password"]').val());
-            data.append('remember', $(form).find('input[name="remember"]').val());
-            
-
-            this.$http.post('/login', data).then(response => {
-                this.loading = false;                
-                var status = response.body.status;
-
-                if (status == "OK") {
-                    this.$notify.success({
-                        title: 'Success',
-                        message: 'You have successfully entered',
-                        duration: 10000,
-                      });
-                    
-                      window.location.href = "/dashboard";
-                    
-                } else {
-                    this.$notify.error({
-                        title: 'Error',
-                        message: response.body.errors,
-                        duration: 10000,
-                      });
-                }
-            }, response => {
-                this.loading = false;                                
-                this.$notify.error({
-                    title: 'Error',
-                    message: 'Some error with login api',
-                    duration: 10000,
-                  });
-            });
-        },
-
-        registerUser: function(form) {
-            this.loading = true;
-
-            var data = new FormData();
-
-            data.append('name', $(form).find('input[name="name"]').val());
-            data.append('first_name', $(form).find('input[name="first_name"]').val());
-            data.append('last_name', $(form).find('input[name="last_name"]').val());
-            data.append('email', $(form).find('input[name="email"]').val());
-            data.append('password', $(form).find('input[name="password"]').val());
-            data.append('password_confirmation', $(form).find('input[name="password_confirmation"]').val());
-            
-            this.$http.post('/register', data).then(response => {
-                this.loading = false;
-                var status = response.body.status;
-
-                if (status == "OK") {
-                    this.$notify.success({
-                        title: 'Success',
-                        message: 'Enter the code you receive on the email',
-                        duration: 10000,
-                      });
-                    this.showRegisterActivate();
-                } else {
-                    this.$notify.error({
-                        title: 'Error',
-                        message: response.body.errors,
-                        duration: 10000,
-                      });
-                }
-            }, response => {
-                this.loading = false;
-
-                this.$notify.error({
-                    title: 'Error',
-                    message: 'Some error with register api',
-                    duration: 10000,
-                  });
-            });
-           /* this.$http.post('/register', {'images': images}).then(response => {
-                a = window.location.replace("http://create.badge-m.com/download");
-                $('.canvas-mask').fadeOut('slow');
-                $('.canvas-loader').fadeOut('slow');
-            }, response => {
-                console.log('Some error with images api!');
-            });*/
-        },
-
-        activateAccount: function() {
-            this.loading = true;
-            var code = $('input[name="code"]').val();
-            this.$http.post('/activate', {code: code}).then(response => {
-                this.loading = false;
-                var status = response.body.status;
-
-                if (status == "OK") {
-                    this.$notify.success({
-                        title: 'Success',
-                        message: 'Your account has been successfully activated',
-                        duration: 10000,
-                      });
-                    this.memberStatus = '';
-                    this.openHome();
-                } else {
-                    this.$notify.error({
-                        title: 'Error',
-                        message: 'You entered an invalid code, please try again',
-                        duration: 10000,
-                      });
-                }
-            }, response => {
-                this.loading = false;
-
-                this.$notify.error({
-                    title: 'Error',
-                    message: 'Some error with register api',
-                    duration: 10000,
-                  });
-            });
-        },
-
-        hoverMenu: function() {
-            $('.menu-home-btn').css('top', '-3px');
-        },
-
-        unhoverMenu: function() {
-            $('.menu-home-btn').css('top', '-23px');
-        },
-
-        openHome: function() {
-            $('.button-sections').hide().children().fadeOut('slow');
-            $('.button-nav').fadeIn('slow').children().animate({'opacity':1}, 300);
-        }
      }
 }) 

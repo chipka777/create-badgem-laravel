@@ -4,13 +4,13 @@
     <div id="app">
         <main-page inline-template>
             <div>
-                <div class="main-navigation-wrap">
+                <div class="main-navigation-wrap" >
                     <div class="main-menu-layer1">
+                        <div class="home-menu animated" @click="homeLoad"></div>                       
                         <div class="insta-menu animated"></div>
-                        <div class="fire-menu animated"></div>   
                         <div class="rocket-menu animated"></div>                                                                     
                     </div>
-                    <div class="main main-navigation-2"  v-loading="loading" @mouseenter="hoverMenu" @mouseleave="unhoverMenu">
+                    <div class="main main-navigation-2"  v-loading="loading">
                         <div class="row main-navigation-header">
                             <div class="col-md-9 welcome-text">
                                 Hello, {{ Auth::user()->name }}!
@@ -25,13 +25,13 @@
                         </div>    
                         <div class="row main-navigation-body">
                             <div class="row">
-                                <div class="col-md-6 bulletin ">
+                                <div class="col-md-6 bulletin" @click="bulletinLoad">
                                     <img class="col-md-4 bulletin-image animated" src="{{ asset('img/bulletin-phase2.png') }}" />
                                     <span class="bulletin-text col-md-6">
                                         Bulletin
                                     </span>
                                 </div>
-                                <div class="col-md-6 creations  pull-right">
+                                <div class="col-md-6 creations  pull-right" @click="creationsLoad(50)">
                                     <img class="col-md-4 creations-image animated" src="{{ asset('img/creations-phase2.png') }}" />
                                     <span class="creations-text col-md-6">
                                         Creations
@@ -39,13 +39,13 @@
                                 </div>
                             </div>
                             <div class="row">
-                                <div class="col-md-6 favorites ">
+                                <div class="col-md-6 favorites" @click="favoritesLoad(50)">
                                     <img class="col-md-4 favorites-image animated" src="{{ asset('img/favorites-phase2.png') }}" />
                                     <span class="favorites-text col-md-6">
                                         Favorites
                                     </span>
                                 </div>
-                                <div class="col-md-6 history ">
+                                <div class="col-md-6 history"  @click="historiesLoad(50)">
                                     <img class="col-md-4 history-image animated" src="{{ asset('img/history-phase2.png') }}" />
                                     <span class="history-text col-md-6">
                                         History
@@ -96,10 +96,20 @@
                 </div>
 
                 <div class="panels">
-                    <div :id='"img-"+image.id' :class='"panel pos"+image.num+" canva-img"' v-for='(image, key) in images' :data-pos="image.num" >
-                        <img onmousedown='panelImg(event, $(this))' :src='"upload/thumbs/" + image.name' v-if="!image.insta" :data-pos="image.num" @mouseenter="showToolTip($event, key)" @mouseleave="hideToolTip($event, key)" />
-                        <img class="insta-img" onmousedown='panelImg(event, $(this))' :src='image.name' v-else :data-pos="image.num" />
-                    </div>
+                    <template v-if="currentSection === 'images'">
+                        <div :id='"img-"+image.id' :class='"panel pos"+image.num+" canva-img"' v-for='(image, key) in images' :data-pos="image.num" >
+                            <div class="image-wrap">
+                                <img onmousedown='panelImg(event, $(this))' :src='"upload/thumbs/" + image.name' v-if="!image.insta" :data-pos="image.num" :data-id="image.id" @mouseenter="showToolTip($event, key)" @mouseleave="hideToolTip($event, key)" />
+                                <img class="insta-img" onmousedown='panelImg(event, $(this))' :src='image.name' v-else :data-pos="image.num" :data-id="image.id" />
+                                <i class="fa fa-heart favorite-heart"></i>    
+                            </div>   
+                        </div>
+                    </template>
+                    <template v-if="currentSection === 'bulletins'">
+                        <div :id='"img-"+key' :class='"panel pos"+key+" cloud-img"' v-for='(bulletin, key) in bulletins' :data-pos="key"  :data-id="key">
+                            <span>@{{ bulletin }}</span>
+                        </div>
+                    </template>
                 </div>
                 <div id="bottom-nav">
                     <div class="bottom-trigger" onmouseenter="botTrigerEnter()" onmouseleave="botTrigerLeave()" onclick="botMenuOpen()">

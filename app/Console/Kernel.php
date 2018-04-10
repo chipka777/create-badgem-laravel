@@ -5,6 +5,7 @@ namespace App\Console;
 use Illuminate\Console\Scheduling\Schedule;
 use Illuminate\Foundation\Console\Kernel as ConsoleKernel;
 
+
 class Kernel extends ConsoleKernel
 {
     /**
@@ -13,7 +14,7 @@ class Kernel extends ConsoleKernel
      * @var array
      */
     protected $commands = [
-        //
+        Commands\RemoveHistory::class
     ];
 
     /**
@@ -24,6 +25,9 @@ class Kernel extends ConsoleKernel
      */
     protected function schedule(Schedule $schedule)
     {
+        $schedule->command(Commands\RemoveHistory::class)->daily();
+
+        
         // $schedule->command('inspire')
         //          ->hourly();
     }
@@ -35,6 +39,7 @@ class Kernel extends ConsoleKernel
      */
     protected function commands()
     {
+        
         require base_path('routes/console.php');
     }
 }

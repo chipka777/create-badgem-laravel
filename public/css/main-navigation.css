@@ -789,16 +789,16 @@ animation-delay: .8s;
     padding-bottom: 100%;
 }
 
-.main-menu-layer1 .fire-menu {
-	background: transparent url(../img/fire-phase2.png) no-repeat center;
+.main-menu-layer1 .home-menu {
+	background: transparent url(../img/logo-phase2.png) no-repeat center;
     cursor: pointer;
-    background-size: 125%;
+    background-size: 69%;
     flex-basis: 100%;
     position: relative;
     padding: .2rem 0;
 }
 
-.main-menu-layer1 .fire-menu:before {
+.main-menu-layer1 .home-menu:before {
 	content: '';
     display: block;
     padding-bottom: 100%;
@@ -971,8 +971,12 @@ animation-delay: .8s;
     .main-navigation-body , 
     .main-navigation-header .welcome-text,
     .main-navigation-header .message .message-text,
-    .main-navigation-header .messages .msg-text {
+    .main-navigation-header .messages .msg-text
+    .cloud-img {
         font-size: 30px;
+    }
+    .cloud-img:hover {
+        font-size: 34px;        
     }
 }
 
@@ -980,7 +984,51 @@ animation-delay: .8s;
 	.main-navigation-body , 
     .main-navigation-header .welcome-text,
     .main-navigation-header .message .message-text,
-    .main-navigation-header .messages .msg-text {
+    .main-navigation-header .messages .msg-text
+    .cloud-img {
         font-size: 40px;
     }
+
+    .cloud-img:hover {
+        font-size: 44px;        
+    }
+}
+
+
+.cloud-img {
+    background: url(/clouds/cloud-with-frame.png);
+    background-size: 62%;
+    background-position: 45% 79%;
+    background-repeat: no-repeat;
+    cursor: pointer;
+    text-align: center;
+    align-items: center;
+    display: flex;
+    justify-content: center;
+    font-family: Bubblegum, sans-serif;
+    font-size: 24px;
+}
+
+.cloud-img:hover {
+    background-size: 68%;
+    font-size: 28px;
+}
+
+.cloud-img img {
+    width: 60%;
+    top: 58%;
+    left: 19%;
+}
+
+.favorite-heart {
+    font-size: 35px !important;
+    position: absolute;
+    color: white;
+    bottom: 10%;
+    z-index: 100;
+    left: 29%;
+}
+
+.image-wrap {
+    display: inline-block;
 }

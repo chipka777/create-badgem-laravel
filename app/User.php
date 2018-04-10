@@ -49,5 +49,20 @@ class User extends Authenticatable
         return $this->hasMany(UserHistory::class);
     }
 
+    public function images()
+    {
+        return $this->hasMany(Image::class);
+    }
+
+    public function favoriteImages()
+    {
+        return $this->belongsToMany(Image::class, 'favorited_images', 'user_id', 'image_id');
+    }
+
+    public function imagesHistory()
+    {
+        return $this->belongsToMany(Image::class, 'images_history', 'user_id', 'image_id');
+    }
+
 
 }

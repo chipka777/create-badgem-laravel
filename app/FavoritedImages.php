@@ -20,4 +20,5 @@ class FavoritedImages extends Model
         $images = Image::whereIn('id', $favorites);
         return $images;
     }
+
 }

@@ -49,22 +49,33 @@ Route::group(['prefix' => 'dashboard', 'namespace' => 'Admin', 'middleware' => '
 });
 
 Route::group(['namespace' => 'API', 'prefix' => 'api/v1'], function() {
-    Route::get('categories/all', 'CategoriesController@getAll');
-    Route::get('categories', 'CategoriesController@getAllVisibility');
-    Route::get('images/count/{category_id}', 'ImagesController@getCountByCategory');
-    Route::get('images/count-by-user/{category_id}', 'ImagesController@getCountByUser');    
-    Route::get('images/{category_id}/{count}/{offset}', 'ImagesController@getImagesByCount');
-    Route::get('images/all/{category_id}/{count}/{offset}', 'ImagesController@getImagesByCountAll');
-    Route::get('images/by-user/{category_id}/{count}/{offset}', 'ImagesController@getImagesByUser');    
-    Route::post('images/instagram', 'ImagesController@getImagesFromInstagram');
-    Route::post('images/create', 'ImagesController@createBadgemImage');
-    Route::get('bitcoins/ticker', 'BitcoinController@getTicker');
-    Route::get('images/add-to-favorite/{id}', 'ImagesController@addToFavorite');
-    Route::get('images/remove-from-favorite/{id}', 'ImagesController@removeFromFavorite');
-    Route::get('notifications/{offset}/{count}', 'Notifications\\MainController@getByCount');
-    Route::get('notifications/set-as-read', 'Notifications\\MainController@setAsRead');
-    Route::get('history/{offset}/{count}/{id}', 'History\MainController@getByCount');    
-    Route::post('set-activity', 'ActivityController@setActivity');
-    Route::get('check-activity', 'ActivityController@checkActivity');
+    Route::group(['namespace' => 'Admin'], function() {
+        Route::get('notifications/{offset}/{count}', 'Notifications\\MainController@getByCount');
+        Route::get('notifications/set-as-read', 'Notifications\\MainController@setAsRead');
+        Route::get('history/{offset}/{count}/{id}', 'History\MainController@getByCount');        
+    });
+
+    Route::group(['namespace' => 'Website'], function() {
+        Route::get('categories/all', 'CategoriesController@getAll');
+        Route::get('categories', 'CategoriesController@getAllVisibility');
+        Route::get('images/count/{category_id}', 'ImagesController@getCountByCategory');
+        Route::get('images/count-by-user/{category_id}', 'ImagesController@getCountByUser');    
+        Route::get('images/{category_id}/{count}/{offset}', 'ImagesController@getImagesByCount');
+        Route::get('images/all/{category_id}/{count}/{offset}', 'ImagesController@getImagesByCountAll');
+        Route::get('images/by-user/{category_id}/{count}/{offset}', 'ImagesController@getImagesByUser');    
+        Route::post('images/instagram', 'ImagesController@getImagesFromInstagram');
+        Route::post('images/create', 'ImagesController@createBadgemImage');
+        Route::get('images/add-to-favorite/{id}', 'ImagesController@addToFavorite');
+        Route::get('images/remove-from-favorite/{id}', 'ImagesController@removeFromFavorite');
+        Route::post('set-activity', 'ActivityController@setActivity');
+        Route::get('check-activity', 'ActivityController@checkActivity');
+
+        Route::get('bulletin', 'BulletinController@getAll');
+        Route::get('creations/{count}/{offset}', 'ImagesController@getCreations');
+        Route::get('favorites/{count}/{offset}', 'ImagesController@getFavorites');
+        Route::get('histories/{count}/{offset}', 'HistoryController@getHistoryByCount');                
+
+        Route::post('set-to-history', 'HistoryController@setToHistory');
+    });
 });
 

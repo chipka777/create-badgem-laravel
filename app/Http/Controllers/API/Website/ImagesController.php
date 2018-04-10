@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Http\Controllers\API;
+namespace App\Http\Controllers\API\Website;
 
 use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
@@ -112,6 +112,51 @@ class ImagesController extends Controller
         return $images;
     }
 
+    public function getCreations($count, $offset)
+    {
+        $query = Auth::user()->images();
+
+        $images = $query->orderBy('id', 'desc')
+            ->offset($offset)
+            ->limit($count)
+            ->get()
+            ->map(function ($image, $key) {
+                $image->num = $key + 1;
+
+                return $image;
+            });
+
+        $count = $query->count();
+
+        return response()->json([
+            'images' => $images,
+            'count'  => $count,
+            'status' => 'OK'
+        ]);
+    }
+
+    public function getFavorites($count, $offset)
+    {
+        $query = Auth::user()->favoriteImages();
+
+        $images = $query->orderBy('id', 'desc')
+            ->offset($offset)
+            ->limit($count)
+            ->get()
+            ->map(function ($image, $key) {
+                $image->num = $key + 1;
+
+                return $image;
+            });
+
+        $count = $query->count();
+
+        return response()->json([
+            'images' => $images,
+            'count'  => $count,
+            'status' => 'OK'
+        ]);
+    }
     public function getCountByCategory($category_id)
     {
         if ($category_id == 'all') {
