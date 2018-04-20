@@ -78,7 +78,7 @@ function panelImg(e,elem) {
        
         var elem = elem;
 
-        var obj = elem.parent();
+        var obj = elem.parent().parent();
         
         var top_per = Math.round(obj.position().top / obj.parent().height() * 100);
         var left_per = Math.round(obj.position().left / obj.parent().width() * 100);
@@ -144,15 +144,27 @@ function panelImg(e,elem) {
             img.left < (canvas.left + canvas_w) ) status =  1;
             if (status) {
 
+
+                var newElem = obj.clone()
+                    .children('.image-wrap')
+                    .children('img');
+
                 var newObject = obj.clone()
                     .appendTo(".canvas")
                     .addClass('border')
+                    .addClass('panel')
+                    .addClass('canva-img')
+                    .show()                                     
                     .append('<span class="img-control" onmousedown="resizeImg(event, $(this))"></span')
+                    .append(newElem)                                           
                     .append('<span class="img-control-delete" onmousedown="deleteImg(event, $(this))"><i class="fa fa-close fa-5" aria-hidden="true"></i></span')
                     .children('img')
                     .addClass('border-active')
                     .removeClass('insta-img')
                     .attr('onmousedown', '');
+
+                
+                newObject.parent().children('.image-wrap').remove();
 
                 setLast(newObject);
                 canvasImg();
@@ -413,6 +425,7 @@ function savePDF() {
 }
 
 $(document).ready(function() {
+    $('.main-menu-layer3').attr('style', 'margin-top : ' + ($('.main-navigation-2').height()/2 + 50) + 'px')    
     setTimeout(function() {
        // $('.button-nav').height($('.button-nav').height());
     }, 300);
@@ -421,6 +434,8 @@ $(document).ready(function() {
 
 
 $(window).resize(function() {
+    $('.main-menu-layer3').width($('.main-navigation-2').width());
+    $('.main-menu-layer3').attr('style', 'margin-top : ' + ($('.main-navigation-2').height()/2 + 50) + 'px')
     //$('.button-nav').attr('style','height:auto');    
     //$('.button-nav').height($('.button-nav').height());
 })

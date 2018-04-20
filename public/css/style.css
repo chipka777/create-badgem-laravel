@@ -334,25 +334,29 @@ width: 28%;
 }
 .panel {
 	padding: 0;
-    position: absolute;
+	position: absolute;
+	display: none;
+	align-items: center;
     z-index: 99;
     width: 29%;
     height: 33%;
     transition: .5s all ease;
-    display: none;
     /* overflow: hidden; */
     border-radius: 20px;
     vertical-align: middle;
 }
 .panel img {
 	position: relative;
-	  top: 70%;
-	  transform: translateY(-50%);
-	  transition: .5s all ease;
+	transform: translateY(0%);
+	transition: .5s all ease;
 }
-.panel:hover img{
-	transform: translateY(-54%);
-}
+
+/*.panel:hover img{
+	transform: translateY(-4%);
+}*/
+
+
+
 .panel .caption {
 	position: absolute;
 	top: 100%;
@@ -837,63 +841,63 @@ width: 28%;
 
 
 .pos0 {
-	display: table-cell;
+	display: flex;
 	top: 66%;
 	left: 100%;
 }
 .pos1 {
-	display: table-cell;
+	display: flex;	
 	top: 66%;
-	left: 77%;
+	left: 80%;
 }
 .pos2 {
-	display: table-cell;
-	top: 66%;
-	left: 51%;
+	display: flex;	
+	top: 68%;
+	left: 58%;
 }
 .pos3 {
-	display: table-cell;
-	top: 66%;
-	left: 21%;
+	display: flex;	
+	top: 68%;
+	left: 18%;
 }
 .pos4 {
-	display: table-cell;
-	top: 66%;
+	display: flex;	
+	top: 68%;
 	left: -5%;
 }
 .pos5 {
-	display: table-cell;
+	display: flex;	
 	top: 30%;
 	left: -5%;
 }
 .pos6 {
-	display: table-cell;
+	display: flex;	
 	top: -5%;
 	left: -5%;
 }
 .pos7 {
-	display: table-cell;
+	display: flex;	
 	top: -5%;
 	left: 21%;
 }
 .pos8 {
-	display: table-cell;
+	display: flex;	
 	top: -5%;
 	left: 51%;
 }
 .pos9 {
-	display: table-cell;
-	left: 77%;
+	display: flex;	
+	left: 80%;
 	top: -5%;
 }
 .pos10 {
-	display: table-cell;
-	left: 77%;
+	display: flex;		
+	left: 80%;
 	top: 30%;
 }
 .pos11 {
-	display: table-cell;
-	left: 77%;
+	display: flex;		
+	left: 80%;
 	top: 100%;
 }
 
@@ -1040,8 +1044,8 @@ button:focus {
 }
 
 .canva-img img {
-	width: 40%;
-	top: 52%;
+	width: 38%;
+	top: 0%;
 	left: 28%;
 }
 .border img {

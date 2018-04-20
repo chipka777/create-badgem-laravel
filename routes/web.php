@@ -70,7 +70,7 @@ Route::group(['namespace' => 'API', 'prefix' => 'api/v1'], function() {
         Route::post('set-activity', 'ActivityController@setActivity');
         Route::get('check-activity', 'ActivityController@checkActivity');
 
-        Route::get('bulletin', 'BulletinController@getAll');
+        Route::get('bulletin/{count}/{offset}', 'BulletinController@getBulletins');
         Route::get('creations/{count}/{offset}', 'ImagesController@getCreations');
         Route::get('favorites/{count}/{offset}', 'ImagesController@getFavorites');
         Route::get('histories/{count}/{offset}', 'HistoryController@getHistoryByCount');                

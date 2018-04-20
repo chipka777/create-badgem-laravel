@@ -25,7 +25,7 @@
                         </div>    
                         <div class="row main-navigation-body">
                             <div class="row">
-                                <div class="col-md-6 bulletin" @click="bulletinLoad">
+                                <div class="col-md-6 bulletin" @click="bulletinLoad(50)">
                                     <img class="col-md-4 bulletin-image animated" src="{{ asset('img/bulletin-phase2.png') }}" />
                                     <span class="bulletin-text col-md-6">
                                         Bulletin
@@ -53,6 +53,7 @@
                                 </div>
                             </div>
                         </div>
+                        
                         <div class="drop-me">
                             <p>Drop me Here</p>
                         </div>
@@ -62,6 +63,13 @@
                         <div class="paint-menu animated"></div>       
                         <div class="zoom-menu animated"></div>                                                                 
                     </div>
+                    <div class="main-menu-layer3">
+                            <div class="left-many animated" @click="spiralManyLeft"></div>
+                            <div class="left-single animated" @click="spiralLeft"></div>
+                            <div class="right-single animated" @click="spiralRight"></div>                             
+                            <div class="right-many animated" @click="spiralManyRight"></div>  
+                        </div>
+                    
                 </div>
                 
                
@@ -98,16 +106,21 @@
                 <div class="panels">
                     <template v-if="currentSection === 'images'">
                         <div :id='"img-"+image.id' :class='"panel pos"+image.num+" canva-img"' v-for='(image, key) in images' :data-pos="image.num" >
-                            <div class="image-wrap">
-                                <img onmousedown='panelImg(event, $(this))' :src='"upload/thumbs/" + image.name' v-if="!image.insta" :data-pos="image.num" :data-id="image.id" @mouseenter="showToolTip($event, key)" @mouseleave="hideToolTip($event, key)" />
+                            <div class="image-wrap" @mouseenter="showToolTip($event, key)" @mouseleave="hideToolTip($event, key)" :data-pos="image.num">
+                                <img onmousedown='panelImg(event, $(this))' :src='"upload/thumbs/" + image.name' v-if="!image.insta" :data-pos="image.num" :data-id="image.id"  />
                                 <img class="insta-img" onmousedown='panelImg(event, $(this))' :src='image.name' v-else :data-pos="image.num" :data-id="image.id" />
-                                <i class="fa fa-heart favorite-heart"></i>    
+                                <el-tooltip class="item" effect="dark" content="Remove from favorites" v-if="image.favorite" placement="top">
+                                    <i class="fa fa-heart favorite-heart"  @click="removeFromFavorited(image.id, key)"></i>    
+                                </el-tooltip>
+                                <el-tooltip class="item" effect="dark" content="Add to favorites" v-else placement="top">
+                                    <i class="fa fa-heart-o favorite-heart "  @click="addToFavorited(image.id, key)"></i>      
+                                </el-tooltip>                              
                             </div>   
                         </div>
                     </template>
                     <template v-if="currentSection === 'bulletins'">
-                        <div :id='"img-"+key' :class='"panel pos"+key+" cloud-img"' v-for='(bulletin, key) in bulletins' :data-pos="key"  :data-id="key">
-                            <span>@{{ bulletin }}</span>
+                        <div :id='"img-"+key' :class='"panel pos"+bulletin.num+" cloud-img"' v-for='(bulletin, key) in bulletins' :data-pos="bulletin.num"  :data-id="key">
+                            <span>@{{ bulletin.data }}</span>
                         </div>
                     </template>
                 </div>

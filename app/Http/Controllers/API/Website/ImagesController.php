@@ -230,9 +230,15 @@ class ImagesController extends Controller
 
         $history->createFromTemplate('unfavorited', Auth::user(), $data);
 
-        return FavoritedImages::where('user_id', Auth::user()->id)
+        $image = FavoritedImages::where('user_id', Auth::user()->id)
                 ->where('image_id', $id)
                 ->delete();
+
+        if ($image instanceOf FavoritedImages) {
+            return $image;
+        } 
+
+        return 0;
     }
 
     public function getImagesFromInstagram()

@@ -4,7 +4,7 @@ Vue.component('main-page', {
             images: [],
             bulletins: [],
             offset: 0,
-            flag: 0,
+            flag: false,
             flagMany: 0,            
             spiral: 0,
             insta: 0,
@@ -13,7 +13,31 @@ Vue.component('main-page', {
             loading: false,
             updateDate: Date.now(),
             currentSection: 'images',
-            currentType: 'images',            
+            currentType: 'images',      
+            lastHovered: '',     
+            loadFavorited: false,
+            sections: {
+                images: {
+                    stop: false,
+                    offset: 0,
+                },
+                creations: {
+                    stop: false,
+                    offset: 0,
+                },
+                favorites: {
+                    stop: false,
+                    offset: 0,
+                },
+                bulletins: {
+                    stop: false,
+                    offset: 0,
+                },
+                histories: {
+                    stop: false,
+                    offset: 0,                    
+                }
+            }
         }
     },
     beforeUpdate: function() {
@@ -31,7 +55,8 @@ Vue.component('main-page', {
         getImages: function(cat_id = 'all', count = 70, cat = false) {           
             if (cat_id == '0') cat_id = 'all';
             this.loading = true;
-            
+            this.sections.images.offset = 0;
+
             this.hideToolTip();
 
             this.$http.get('/api/v1/images/' + cat_id + '/' + count + '/0').then(response => {
@@ -39,7 +64,7 @@ Vue.component('main-page', {
                 this.currentType = 'images';
 
                 this.images = response.data;
-                this.offset = 50;
+                this.sections.images.offset = count;
                 this.loading = false;
                 
             }, response => {
@@ -63,14 +88,13 @@ Vue.component('main-page', {
         },*/
 
         setImageToPanels: function(last, cat_id = 'all') {
-            if (this.flag || this.stop) return false;
+            if (this.flag || this.sections.images.stop) return false;
 
-            this.flag = 1;
+            this.flag = true;
             this.hideToolTip();
             
-            this.$http.get('/api/v1/images/' + cat_id + '/20/' + this.offset).then(response => {
-                this.offset += 20;
-                if (response.data.length < 1) this.stop = 1;
+            this.$http.get('/api/v1/images/' + cat_id + '/20/' + this.sections.images.offset).then(response => {
+                this.sections.images.offset += 20;
 
                 images = response.data;                
                 last_num = this.images[this.images.length - 1].num;
@@ -84,8 +108,153 @@ Vue.component('main-page', {
 
                 this.images = images;
 
-                this.flag = 0;
-                this.spiralRight();
+                this.flag = false;
+
+                if (response.data.length < 1){
+                    this.sections.images.stop = true;
+                } else {
+                    this.spiralRight();
+                }
+
+            }, response => {
+                console.log('Some error with images api!');
+            });
+        },
+
+        setCreationsToPanels: function(last, cat_id = 'all') {
+            if (this.flag || this.sections.creations.stop) return false;
+
+            this.flag = true;
+            this.hideToolTip();
+
+            this.$http.get('/api/v1/creations/20/' + this.sections.creations.offset).then(response => {
+                this.sections.creations.offset += 20;
+
+                images = response.data.images;                
+                last_num = this.images[this.images.length - 1].num;
+
+                ln = images.length;
+                for (var i = 0; i < ln; i++) {
+                    ++last_num;
+                    images[i].num = last_num;
+                }
+                images = this.images.concat(images);
+
+                this.images = images;
+
+                this.flag = false;                
+
+                if (response.data.count == 0){
+                    this.sections.creations.stop = true;
+                } else {
+                    this.spiralRight();
+                }
+                
+            }, response => {
+                console.log('Some error with images api!');
+            });
+        },
+
+        setFavoritesToPanels: function(last, cat_id = 'all') {
+            if (this.flag || this.sections.favorites.stop) return false;
+
+            this.flag = true;
+            
+            this.hideToolTip();
+
+            this.$http.get('/api/v1/favorites/20/' + this.sections.favorites.offset).then(response => {
+                this.sections.favorites.offset += 20;
+
+                images = response.data.images;                
+                last_num = this.images[this.images.length - 1].num;
+
+                ln = images.length;
+                for (var i = 0; i < ln; i++) {
+                    ++last_num;
+                    images[i].num = last_num;
+                }
+                images = this.images.concat(images);
+
+                this.images = images;
+
+                this.flag = false;                
+
+                if (response.data.count == 0){
+                    this.sections.favorites.stop = true;
+                } else {
+                    this.spiralRight();
+                }
+                
+            }, response => {
+                console.log('Some error with images api!');
+            });
+        },
+
+        setBulletinsToPanels: function(last, cat_id = 'all') {
+            if (this.flag || this.sections.bulletins.stop) return false;
+
+            this.flag = true;
+            
+            this.hideToolTip();
+
+            this.$http.get('/api/v1/bulletin/20/' + this.sections.bulletins.offset).then(response => {
+                this.sections.bulletins.offset += 20;
+
+                bulletins = response.data.bulletins;                
+                last_num = this.bulletins[this.bulletins.length - 1].num;
+
+                ln = bulletins.length;
+                for (var i = 0; i < ln; i++) {
+                    ++last_num;
+                    bulletins[i].num = last_num;
+                }
+                bulletins = this.bulletins.concat(bulletins);
+
+                this.bulletins = bulletins;
+
+                this.flag = false;                
+
+                if (response.data.count == 0){
+                    this.sections.bulletins.stop = true;
+                } else {
+                    this.spiralRight();
+                }
+                
+            }, response => {
+                console.log('Some error with images api!');
+            });
+        },
+
+        setHistoriesToPanels: function(last, cat_id = 'all') {
+            if (this.flag || this.sections.histories.stop) return false;
+
+            this.flag = true;
+            
+            this.hideToolTip();
+
+            this.$http.get('/api/v1/histories/20/' + this.sections.histories.offset).then(response => {
+                this.sections.histories.offset += 20;
+
+                images = response.data.images;                
+                last_num = this.images[this.images.length - 1].num;
+
+                ln = images.length;
+                for (var i = 0; i < ln; i++) {
+                    ++last_num;
+                    images[i].num = last_num;
+                }
+                images = this.images.concat(images);
+
+                this.images = images;
+
+                this.flag = false;                
+
+                if (response.data.count == 0){
+                    this.sections.histories.stop = true;
+                } else {
+                    this.spiralRight();
+                }
+                
             }, response => {
                 console.log('Some error with images api!');
             });
@@ -93,14 +262,17 @@ Vue.component('main-page', {
 
         homeLoad: function() {
             this.getImages();
-            console.log('homeLoad');
         },
 
-        bulletinLoad: function() {
+        bulletinLoad: function(count = 50) {
             this.loading = true;
             this.hideToolTip();            
             
-            this.$http.get('/api/v1/bulletin').then(response => {
+            this.sections.bulletins.offset = 0;
+
+            this.$http.get('/api/v1/bulletin/' + count + '/' + this.sections.bulletins.offset).then(response => {
+                this.sections.bulletins.offset = count;
+            
                 if (response.body.status === "OK") {
                     this.bulletins = response.body.bulletins;
 
@@ -128,13 +300,13 @@ Vue.component('main-page', {
 
         creationsLoad: function(count = 50) {
             this.loading = true;
-            this.hideToolTip();            
+            this.hideToolTip();     
+            
+            this.sections.creations.offset = 0;
 
-            if (this.currentType != 'creations') {
-                this.offset = 0;
-            }
+            this.$http.get('/api/v1/creations/' + count + '/' + this.sections.creations.offset).then(response => {
+                this.sections.creations.offset = count;
 
-            this.$http.get('/api/v1/creations/' + count + '/' + this.offset).then(response => {
                 if (response.body.status === "OK") {
                     this.images = response.body.images;
 
@@ -164,11 +336,11 @@ Vue.component('main-page', {
             this.loading = true;
             this.hideToolTip();
 
-            if (this.currentType != 'favorites') {
-                this.offset = 0;
-            }
+            this.sections.favorites.offset = 0;
 
-            this.$http.get('/api/v1/favorites/' + count + '/' + this.offset).then(response => {
+            this.$http.get('/api/v1/favorites/' + count + '/' + this.sections.favorites.offset).then(response => {
+                this.sections.favorites.offset = count;
+                
                 if (response.body.status === "OK") {
                     this.images = response.body.images;
 
@@ -198,11 +370,11 @@ Vue.component('main-page', {
             this.loading = true;
             this.hideToolTip();
 
-            if (this.currentType != 'histories') {
-                this.offset = 0;
-            }
+            this.sections.histories.offset = 0;
 
-            this.$http.get('/api/v1/histories/' + count + '/' + this.offset).then(response => {
+            this.$http.get('/api/v1/histories/' + count + '/' + this.sections.histories.offset).then(response => {
+                this.sections.histories.offset = count;
+
                 if (response.body.status === "OK") {
                     this.images = response.body.images;
 
@@ -229,36 +401,78 @@ Vue.component('main-page', {
         },
 
         spiralRight: function() {
-            last = Number($('.panels div:last-child').attr('data-pos')) - 1;
+            last = Number($('.panels div:last').attr('data-pos')) - 1;
             self = this;
             cat_id = $('#select-cat').val();
             if (cat_id == '0') cat_id = 'all';
 
-            if (last < 9 && !this.flag) this.setImageToPanels(last + 1, cat_id);
             if (this.flag) return false;
+            
+            if (last < 9 && !this.flag) {
+                switch (this.currentType) {
+                    case 'images':
+                        this.setImageToPanels(last + 1, cat_id);
+                        break;
+                    case 'creations':
+                        this.setCreationsToPanels(last + 1, cat_id);
+                        break;
+                    case 'favorites':
+                        this.setFavoritesToPanels(last + 1, cat_id);
+                        break;
+                    case 'bulletins':
+                        this.setBulletinsToPanels(last + 1, cat_id);
+                        break;
+                    case 'histories':
+                        this.setHistoriesToPanels(last + 1, cat_id);
+                        break;
+                }
+            } 
 
             if (last > 0) {
-                ln = this.images.length;
-                images = this.images;
-                for(var i = 0; i < ln; i++) {
-                    images[i].num -= 1;
+                if (this.currentSection == 'images') {
+                    ln = this.images.length;
+                    images = this.images;
+                    for(var i = 0; i < ln; i++) {
+                        images[i].num -= 1;
+                    }
+                    this.images = images;
                 }
-                this.images = images;
 
-                this.flag = 0;
+                if (this.currentSection == 'bulletins') {
+                    ln = this.bulletins.length;
+                    bulletins = this.bulletins;
+                    for(var i = 0; i < ln; i++) {
+                        bulletins[i].num -= 1;
+                    }
+
+                    this.bulletins = bulletins;
+                    
+                }
             }
         },
 
         spiralLeft: function() {
             first = Number($('.panels div:first-child').attr('data-pos'));
             if (first < 1) {
-                ln = this.images.length;
-                images = this.images;
-                for(var i = 0; i < ln; i++) {
-                    images[i].num += 1;
+                if (this.currentSection == 'images') {
+                    ln = this.images.length;
+                    images = this.images;
+                    for(var i = 0; i < ln; i++) {
+                        images[i].num += 1;
+                    }
+                    
+                    this.images = images;
                 }
-                
-                this.images = images;
+                if (this.currentSection == 'bulletins') {
+                    ln = this.bulletins.length;
+                    bulletins = this.bulletins;
+                    for(var i = 0; i < ln; i++) {
+                        bulletins[i].num += 1;
+                    }
+
+                    this.bulletins = bulletins;
+                    
+                }
             }
         },
         spiralManyLeft: function() {
@@ -286,7 +500,7 @@ Vue.component('main-page', {
             var self = this;
             self.itemsTmp = 0;
             var timer = setInterval(function() {
-                    setTimeout(self.spiralRight, 0 );
+                    setTimeout(self.spiralRight, 100 );
                     self.itemsTmp += 1;
                     if (self.flag) self.itemsTmp -= 1;
                     if (self.itemsTmp > 9) {
@@ -328,10 +542,67 @@ Vue.component('main-page', {
             });
         },
 
+        addToFavorited: function(id,key) {            
+            if (this.loadFavorited ) return false;
+            if (this.images[key].favorite === true) return this.removeFromFavorited(id, key);
+            
+            this.loadFavorited = true;
+
+            this.$http.get('/api/v1/images/add-to-favorite/' + id).then(response => {
+                this.images[key].favorite = true;
+                this.loadFavorited = false;
+                
+
+                this.$notify.success({
+                    title: 'Success',
+                    message: 'This badge was successfully added to favorites',
+                    duration: 10000,
+                });
+                                 
+            }, response => {
+                this.loadFavorited = false;
+                
+                this.$notify.error({
+                    title: 'Error',
+                    message: 'Some error with favorites api',
+                    duration: 10000,
+                });
+            });
+        },
+
+        removeFromFavorited: function(id,key) {
+            if (this.loadFavorited ) return false;
+
+            if (this.images[key].favorite === false) return this.addToFavorited(id, key);
+            this.loadFavorited = true;
+
+            this.$http.get('/api/v1/images/remove-from-favorite/' + id).then(response => {
+                this.images[key].favorite = false;
+                this.loadFavorited = false;
+
+                this.$notify.success({
+                    title: 'Success',
+                    message: 'This badge was successfully removed from favorites',
+                    duration: 10000,
+                });
+                
+            }, response => {
+                this.loadFavorited = false;
+                
+                this.$notify.error({
+                    title: 'Error',
+                    message: 'Some error with favorites api',
+                    duration: 10000,
+                });
+            });
+        },
+
         showToolTip: function(event, index) {
             if (window.main_flag) return false;
 
-            console.log(event.target);
+            $(event.target).children('.favorite-heart').removeClass('hidden');
+
+            this.lastHovered = event.target;
 
             var img = this.images[index];
 
@@ -346,10 +617,14 @@ Vue.component('main-page', {
             $('html').on('mousemove', function(event) {
                 $('#tooltip').css({'top': event.pageY + 10, 'left': event.pageX + 10});
             });
+
         },
 
         hideToolTip: function(event, index) {
             if (window.main_flag) return false;
+            
+            $(this.lastHovered).children('.favorite-heart').addClass('hidden'); 
+
             $('html').off('mousemove');
 
             $('#tooltip').remove();

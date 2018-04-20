@@ -42,7 +42,7 @@
 	justify-content: center;
 	flex-basis: 35%;
 	min-height: 300px;
-	height: 40vh;
+	height: 37vh;
 	font-family: Bubblegum, sans-serif;
 	background: #fff url(../img/back-menu.png) center;
 	background-size: 130%;
@@ -765,6 +765,53 @@ animation-delay: .8s;
 	z-index: 100;	
 }
 
+.main-menu-layer3 {
+    position: absolute;
+    width: 550px;
+    z-index: 111;
+}
+
+.main-menu-layer3 div {
+    margin-left: 5px;
+    transition: all .5s ease;
+}
+
+.main-menu-layer3 .left-many {
+    background: transparent url(../img/left-many-arrow.png) no-repeat center;
+}
+
+.main-menu-layer3 .left-single {
+    background: transparent url(../img/left-arrow.png) no-repeat center;
+}
+
+.main-menu-layer3 .right-many {
+    background: transparent url(../img/right-many-arrow.png) no-repeat center;
+}
+
+.main-menu-layer3 .right-single {
+    background: transparent url(../img/right-arrow.png) no-repeat center;
+}
+
+.main-menu-layer3 .left-many,
+.main-menu-layer3 .left-single,
+.main-menu-layer3 .right-many,
+.main-menu-layer3 .right-single {
+    display: inline-block;
+    cursor: pointer;
+    background-size: contain;
+    width: 23%;
+    height: 86px;
+}
+
+@media screen and (max-width: 2150px) {
+    .main-menu-layer3 .left-many,
+    .main-menu-layer3 .left-single,
+    .main-menu-layer3 .right-many,
+    .main-menu-layer3 .right-single {
+        background-size: 59%;
+    }
+}
+
 .mt-14p {
 	margin-top: -14% !important;
 	align-self: center;
@@ -1003,7 +1050,6 @@ animation-delay: .8s;
     cursor: pointer;
     text-align: center;
     align-items: center;
-    display: flex;
     justify-content: center;
     font-family: Bubblegum, sans-serif;
     font-size: 24px;
@@ -1024,11 +1070,31 @@ animation-delay: .8s;
     font-size: 35px !important;
     position: absolute;
     color: white;
-    bottom: 10%;
+    bottom: 1%;
     z-index: 100;
     left: 29%;
+    cursor: pointer;
 }
 
 .image-wrap {
     display: inline-block;
+    position: absolute;
+    height: fit-content;
+    width: 90%;
+    transform: translateY(0%);
+	transition: .5s all ease;
 }
+
+.image-wrap:hover {
+    transform: translateY(-4%);	
+}
+
+.favorite-heart {
+    visibility: hidden;
+}
+
+.image-wrap:hover .favorite-heart {
+    visibility: visible;
+}
+
+

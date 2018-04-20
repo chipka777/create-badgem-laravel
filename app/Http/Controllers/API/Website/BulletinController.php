@@ -7,8 +7,10 @@ use App\Http\Controllers\Controller;
 
 class BulletinController extends Controller
 {
-    public function getAll()
+    public function getBulletins($count, $offset)
     {
+        $data = [];
+
         $bulletins = [
             1  => 'bulletin 1',
             2  => 'bulletin 2',
@@ -23,8 +25,20 @@ class BulletinController extends Controller
             11 => 'bulletin 11',                                    
         ];
 
+        $counter = 0;
+
+        for($i = $offset;$i < $count; $i++) {
+            if (isset($bulletins[$i])){
+                $counter++;                
+                $data[$counter] = [];
+                $data[$counter]['data'] = $bulletins[$i];
+                $data[$counter]['num'] = $counter;
+            } 
+        }
+
         return response()->json([
-            'bulletins' => $bulletins,
+            'bulletins' => array_values($data),
+            'count'  => count($data),
             'status' => 'OK'
         ]);
     }
