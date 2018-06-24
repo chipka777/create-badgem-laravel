@@ -10,7 +10,7 @@ use App\User;
 
 class MainController extends Controller
 {
-    public function index()
+    public function index(Request $request)
     {
        /* $user = User::find(1);
         Mail::send('emails.registerCode', ['user' => $user], function ($m) use ($user) {

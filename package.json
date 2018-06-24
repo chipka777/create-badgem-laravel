@@ -21,6 +21,8 @@
   },
   "dependencies": {
     "bitstamp": "^1.0.4",
+    "element-ui": "^2.3.6",
+    "vue2-google-maps": "^0.9.6",
     "vuejs-paginate": "^1.4.0"
   }
 }

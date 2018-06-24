@@ -241,17 +241,27 @@ class ImagesController extends Controller
         return 0;
     }
 
-    public function getImagesFromInstagram()
+    public function getImagesFromInstagram(Request $request)
     {
-        $panel = "";
+        /*$panel = "";
         $access_token = '13912890.3a81a9f.e3b482cc330b4aa5abd41bf48d9c7272';
         $username = 'honeybadgem';
         $user_id = 3967824490;
-        $return = $this->getInstagramDataByApi("https://api.instagram.com/v1/users/" . $user_id . "/media/recent?access_token=" . $access_token."");
-        $counter = 0;
+        //$return = $this->getInstagramDataByApi("https://api.instagram.com/v1/users/" . $user_id . "/media/recent?access_token=" . $access_token."");*/
+
+        $max_id = '';
+        
+        if ($request->max_id != 0) {
+            $max_id = '&max_id=' . $request->max_id;
+        }
+
+        $return = $this->getInstagramDataByApi("https://api.instagram.com/v1/users/self/media/recent/?access_token=3967824490.a1e1682.d3a638c2bea54b6aba5c6c3d607c7f89" . $max_id);
+        
         $data = [];
+        
         foreach ($return->data as $key => $post)
         {
+
             $entry = new \StdClass;
             $entry->id = $post->id;
             $entry->num = $key + 1;
@@ -271,7 +281,15 @@ class ImagesController extends Controller
             $counter++;*/
         }
 
-       return $data ;
+
+        $maxId = end($data)->id;
+
+
+        return response()->json([
+            'images' => $data,
+            'status' => 'OK',
+            'max_id' => $maxId
+        ]);
     }
 
     public function getInstagramDataByApi( $api_url )

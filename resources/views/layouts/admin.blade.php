@@ -94,10 +94,6 @@
 					<nav>
 						<ul class="nav">
 							<li><a href="{{ url('dashboard') }}" class="{{ ($page == 'dashboard') ? 'active' : null }}"><i class="lnr lnr-home"></i> <span>Dashboard</span></a></li>
-							
-
-							
-							
 								<li>
 									<a href="#subPages" class="collapsed {{ ($page == 'images') ? 'active' : null }}" data-toggle="collapse" aria-expanded= "false"><i class="lnr lnr-picture"></i> <span>Images</span> <i class="icon-submenu lnr lnr-chevron-left"></i></a>
 									<div id="subPages" class="collapse ">
@@ -119,7 +115,46 @@
 							@endpermission
 
 							@role('administrator')
+								<li>
+									<a href="#products" class="collapsed {{ ($page == 'products') ? 'active' : null }}" data-toggle="collapse" aria-expanded= "false">
+										<i class="fa fa-shopping-cart" aria-hidden="true"></i>
+											<span>Products</span>
+										<i class="icon-submenu lnr lnr-chevron-left"></i>
+									</a>
+									<div id="products" class="collapse ">
+										<ul class="nav">
+											<li><a href="{{ route('products.cap.index') }}" class="{{ ($page == 'products') ? 'active' : null }}"><i class="fa fa-shopping-cart" aria-hidden="true"></i><span>Products</span></a></li>																										
+										</ul>
+									</div>
+								</li>
+							@endrole
+
+							@role('administrator')
+								<li>
+									<a href="{{ route('videos.index') }}" class="{{ ($page == 'videos') ? 'active' : null }}">
+										<i class="fa fa-youtube" aria-hidden="true"></i>
+										<span>Videos</span>
+									</a>
+								</li>
+
+							@endrole
+
+							@role('administrator')
 								<li><a href="{{ url('dashboard/users') }}" class="{{ ($page == 'users') ? 'active' : null }}"><i class="fa fa-users" aria-hidden="true"></i> <span>Users</span></a></li>						
+								<li>
+									<a href="#aboutPages" class="collapsed {{ ($page == 'about') ? 'active' : null }}" data-toggle="collapse" aria-expanded= "false">
+										<i class="fa fa-book" aria-hidden="true"></i>
+											<span>About Us</span>
+										<i class="icon-submenu lnr lnr-chevron-left"></i>
+									</a>
+									<div id="aboutPages" class="collapse ">
+										<ul class="nav">
+											<li><a href="{{ route('team.index') }}" class="{{ ($page == 'team') ? 'active' : null }}"><i class="fa fa-users" aria-hidden="true"></i><span>Team</span></a></li>																										
+											<li><a href="{{ route('goals.index') }}" class="{{ ($page == 'goal') ? 'active' : null }}"><i class="fa fa-star" aria-hidden="true"></i><span>Goals</span></a></li>																																					
+											<li><a href="{{ route('faq.index') }}" class="{{ ($page == 'faq') ? 'active' : null }}"><i class="fa fa-question-circle" aria-hidden="true"></i><span>FAQ</span></a></li>						
+										</ul>
+									</div>
+								</li>
 							@endrole
 
 							@role('consumer')

@@ -15,6 +15,7 @@
         <script src="{{ asset('js/canvas.js') }}" type="text/javascript"></script>
         <script src="{{ asset('bootstrap/js/bootstrap.min.js')}}"></script>
 
+        @yield('custom-css')
         <meta name="csrf-token" content="{{ csrf_token() }}">
         <link rel="apple-touch-icon" sizes="76x76" href="/assets/img/apple-icon.png">
 	    <link rel="icon" type="image/png" sizes="96x96" href="/assets/img/favicon.png">

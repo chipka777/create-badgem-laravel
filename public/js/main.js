@@ -232,3 +232,8 @@ function botMenuClose()
     $('#bottom-nav').css('bottom', '-50px');
 }
 
+$('html').keypress(function(event) {
+     if (event.keyCode == 13) {
+         $('.login-btn').click();
+     }
+})

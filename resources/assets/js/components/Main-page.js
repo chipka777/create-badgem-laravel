@@ -3,8 +3,14 @@ Vue.component('main-page', {
         return {
             images: [],
             bulletins: [],
+            categories: [],
+            products: [],
+            currentProduct: {},
+            currentProductType: 'all',
             offset: 0,
             flag: false,
+            openVideoIndicator: false,
+            currentVideoCode: '',
             flagMany: 0,            
             spiral: 0,
             insta: 0,
@@ -13,9 +19,17 @@ Vue.component('main-page', {
             loading: false,
             updateDate: Date.now(),
             currentSection: 'images',
-            currentType: 'images',      
+            currentType: 'images',
+            showMenu: true,
             lastHovered: '',     
             loadFavorited: false,
+            additionalCurrentType: '',
+            cloudData: {
+                text: 'Bulletin',
+                title: 'Title',
+                open: false,
+            },
+            teamCloudData: {},
             sections: {
                 images: {
                     stop: false,
@@ -36,6 +50,30 @@ Vue.component('main-page', {
                 histories: {
                     stop: false,
                     offset: 0,                    
+                },
+                faq: {
+                    stop: false,
+                    offset: 0,
+                },
+                instagram: {
+                    stop: false,
+                    max_id: 0,
+                },
+                team: {
+                    stop: false,
+                    offset: 0,
+                },
+                goals: {
+                    stop: false,
+                    offset: 0,
+                },
+                products: {
+                    stop: false,
+                    offset: 0,
+                },
+                videos: {
+                    stop: false,
+                    offset: 0,
                 }
             }
         }
@@ -50,18 +88,28 @@ Vue.component('main-page', {
     },
     mounted: function() {
         this.getImages();
+        this.getCategories();        
     },
     methods: {
-        getImages: function(cat_id = 'all', count = 70, cat = false) {           
+        getCategories: function() {
+            this.$http.get('/api/v1/categories').then(response => {
+                this.categories = response.data;
+            }, response => {
+                console.log('Some error with categories api!');
+            });
+        },
+        getImages: function(cat_id = 'all', count = 70, menu = true, additional = '') {           
             if (cat_id == '0') cat_id = 'all';
             this.loading = true;
             this.sections.images.offset = 0;
+            this.showMenu = menu;
 
             this.hideToolTip();
 
             this.$http.get('/api/v1/images/' + cat_id + '/' + count + '/0').then(response => {
                 this.currentSection = 'images';
                 this.currentType = 'images';
+                this.additionalCurrentType = additional;                
 
                 this.images = response.data;
                 this.sections.images.offset = count;
@@ -73,30 +121,17 @@ Vue.component('main-page', {
             });
         },
 
-        /*getInstaImages: function () {
-            this.hideNav();
-            
-            this.$http.post('/api/v1/images/instagram').then(response => {
-                this.insta = 1;
-                this.images = response.data;
-                this.offset = 20;
-                this.showNav();
-                this.hideToolTip();
-            }, response => {
-                console.log('Some error with instagram images api!');
-            });
-        },*/
-
-        setImageToPanels: function(last, cat_id = 'all') {
-            if (this.flag || this.sections.images.stop) return false;
+        setInstaToPanels: function(last, cat_id = 'all') {
+            if (this.flag || this.sections[this.currentType].stop) return false;
 
             this.flag = true;
             this.hideToolTip();
             
-            this.$http.get('/api/v1/images/' + cat_id + '/20/' + this.sections.images.offset).then(response => {
-                this.sections.images.offset += 20;
+            this.$http.post('/api/v1/images/instagram', {max_id: this.sections.instagram.max_id, count: 20}).then(response => {
+                this.sections.instagram.max_id = response.body.max_id;
 
-                images = response.data;                
+                images = response.data.images;    
+
                 last_num = this.images[this.images.length - 1].num;
 
                 ln = images.length;
@@ -110,62 +145,33 @@ Vue.component('main-page', {
 
                 this.flag = false;
 
-                if (response.data.length < 1){
-                    this.sections.images.stop = true;
+                if (response.data.images.length < 1){
+                    this.sections.instagram.stop = true;
                 } else {
                     this.spiralRight();
                 }
 
             }, response => {
-                console.log('Some error with images api!');
+                console.log('Some error with instagram api!');
             });
         },
 
-        setCreationsToPanels: function(last, cat_id = 'all') {
-            if (this.flag || this.sections.creations.stop) return false;
+        setImageToPanels: function(last, cat_id = 'all') {
+            if (this.flag || this.sections[this.currentType].stop) return false;
 
             this.flag = true;
             this.hideToolTip();
-
-            this.$http.get('/api/v1/creations/20/' + this.sections.creations.offset).then(response => {
-                this.sections.creations.offset += 20;
-
-                images = response.data.images;                
-                last_num = this.images[this.images.length - 1].num;
-
-                ln = images.length;
-                for (var i = 0; i < ln; i++) {
-                    ++last_num;
-                    images[i].num = last_num;
-                }
-                images = this.images.concat(images);
-
-                this.images = images;
-
-                this.flag = false;                
-
-                if (response.data.count == 0){
-                    this.sections.creations.stop = true;
-                } else {
-                    this.spiralRight();
-                }
-                
-            }, response => {
-                console.log('Some error with images api!');
-            });
-        },
-
-        setFavoritesToPanels: function(last, cat_id = 'all') {
-            if (this.flag || this.sections.favorites.stop) return false;
-
-            this.flag = true;
             
-            this.hideToolTip();
+            this.$http.get('/api/v1/' + this.currentType + ((this.currentType == 'images') ? '/' + cat_id : '') + '/20/' + this.sections[this.currentType].offset).then(response => {
+                this.sections[this.currentType].offset += 20;
 
-            this.$http.get('/api/v1/favorites/20/' + this.sections.favorites.offset).then(response => {
-                this.sections.favorites.offset += 20;
-
-                images = response.data.images;                
+                if (this.currentType == 'images') {
+                    images = response.data;                
+                } else {
+                    images = response.data.images;                 
+                }
+                 this.hideToolTip();
+                
                 last_num = this.images[this.images.length - 1].num;
 
                 ln = images.length;
@@ -177,28 +183,28 @@ Vue.component('main-page', {
 
                 this.images = images;
 
-                this.flag = false;                
+                this.flag = false;
 
-                if (response.data.count == 0){
-                    this.sections.favorites.stop = true;
+                if (response.data.length < 1 || response.data.count === 0){
+                    this.sections[this.currentType].stop = true;
                 } else {
                     this.spiralRight();
                 }
-                
+
             }, response => {
-                console.log('Some error with images api!');
+                console.log('Some error with ' + this.currentType + ' api!');
             });
         },
 
         setBulletinsToPanels: function(last, cat_id = 'all') {
-            if (this.flag || this.sections.bulletins.stop) return false;
+            if (this.flag || this.sections[this.currentType].stop) return false;
 
             this.flag = true;
             
             this.hideToolTip();
 
-            this.$http.get('/api/v1/bulletin/20/' + this.sections.bulletins.offset).then(response => {
-                this.sections.bulletins.offset += 20;
+            this.$http.get('/api/v1/' + this.currentType + '/20/' + this.sections[this.currentType].offset).then(response => {
+                this.sections[this.currentType].offset += 20;
 
                 bulletins = response.data.bulletins;                
                 last_num = this.bulletins[this.bulletins.length - 1].num;
@@ -215,48 +221,67 @@ Vue.component('main-page', {
                 this.flag = false;                
 
                 if (response.data.count == 0){
-                    this.sections.bulletins.stop = true;
+                    this.sections[this.currentType].stop = true;
                 } else {
                     this.spiralRight();
                 }
                 
             }, response => {
-                console.log('Some error with images api!');
+                console.log('Some error with '+ this.currentType +' api!');
             });
         },
 
-        setHistoriesToPanels: function(last, cat_id = 'all') {
-            if (this.flag || this.sections.histories.stop) return false;
+        setProductsToPanels: function(last, cat_id = 'all') {
+            if (this.flag || this.sections[this.currentType].stop) return false;
 
             this.flag = true;
             
             this.hideToolTip();
+            
+            this.$http.get('/api/v1/products/' + this.currentProductType + '/20/' + this.sections[this.currentType].offset).then(response => {
+                this.sections[this.currentType].offset += 20;
 
-            this.$http.get('/api/v1/histories/20/' + this.sections.histories.offset).then(response => {
-                this.sections.histories.offset += 20;
+                if (response.body.status === "OK") {
+                    let products = response.body.products;
+                    last_num = this.products[this.products.length - 1].num;
 
-                images = response.data.images;                
-                last_num = this.images[this.images.length - 1].num;
+                    products.map(function (item) {
+                        item.size = item.sizes.split('|');
+                        if (item.extra_images) {
+                            item.extra = item.extra_images.split('|');
+                        }
+                        return item;
+                    });
+                    this.hideToolTip();
+                    
+                    ln = products.length;
+                    for (var i = 0; i < ln; i++) {
+                        ++last_num;
+                        products[i].num = last_num;
+                    }
+                    products = this.products.concat(products);
 
-                ln = images.length;
-                for (var i = 0; i < ln; i++) {
-                    ++last_num;
-                    images[i].num = last_num;
+                    this.products = products;
+                    this.flag = false;                
+
+                    if (response.body.count == 0){
+                        this.sections[this.currentType].stop = true;
+                    } else {
+                        this.spiralRight();
+                    }
+                }else {
+                    this.$notify.error({
+                        title: 'Error',
+                        message: 'Some error with ' + this.currentType + ' api',
+                        duration: 10000,
+                    });
                 }
-                images = this.images.concat(images);
-
-                this.images = images;
-
-                this.flag = false;                
-
-                if (response.data.count == 0){
-                    this.sections.histories.stop = true;
-                } else {
-                    this.spiralRight();
-                }
-                
             }, response => {
-                console.log('Some error with images api!');
+                this.$notify.error({
+                    title: 'Error',
+                    message: 'Some error with ' + this.currentType + ' api',
+                    duration: 10000,
+                });
             });
         },
 
@@ -264,24 +289,105 @@ Vue.component('main-page', {
             this.getImages();
         },
 
-        bulletinLoad: function(count = 50) {
+        instagramLoad: function() {
+            this.loading = true;
+            this.hideToolTip();     
+            this.showMenu = true;
+
+            this.currentSection = 'instagram';
+            this.currentType = 'instagram';
+
+            this.sections.instagram.max_id = 0;
+
+            this.$http.post('/api/v1/images/instagram', {max_id: this.sections.instagram.max_id, count: 50}).then(response => {
+                if (response.body.status === "OK") {
+                    this.images = response.body.images;
+                    this.hideToolTip();     
+                    
+
+                    this.sections.instagram.max_id = response.body.max_id;
+                }else {
+                    this.$notify.error({
+                        title: 'Error',
+                        message: 'Some error with instagram api',
+                        duration: 10000,
+                    });
+                }
+                
+                this.loading = false;
+             }, response => {
+                this.loading = false;    
+
+                this.$notify.error({
+                    title: 'Error',
+                    message: 'Some error with instagram  api',
+                    duration: 10000,
+                });
+             });
+        },
+
+        imageLoad: function(type, count = 50, menu = true, additional = '', currentSection = 'images') {
+            this.loading = true;
+            this.hideToolTip();     
+            this.showMenu = menu;
+
+            this.sections[type].offset = 0;
+
+            this.$http.get('/api/v1/' + type + '/' + count + '/' + this.sections[type].offset).then(response => {
+                this.sections[type].offset = count;
+
+                if (response.body.status === "OK") {
+                    this.images = response.body.images;
+                    this.additionalCurrentType = additional;                    
+                    this.hideToolTip();     
+
+                    this.currentSection = currentSection;
+                    this.currentType = type;
+                }else {
+                    this.$notify.error({
+                        title: 'Error',
+                        message: 'Some error with ' + type + ' api',
+                        duration: 10000,
+                    });
+                }
+                
+                this.loading = false;
+             }, response => {
+                this.loading = false;    
+
+                this.$notify.error({
+                    title: 'Error',
+                    message: 'Some error with ' + type + ' api',
+                    duration: 10000,
+                });
+             });
+        },
+
+
+        bulletinLoad: function(type, count = 50, menu = true, additional = '') {
             this.loading = true;
             this.hideToolTip();            
-            
-            this.sections.bulletins.offset = 0;
+            this.showMenu = menu;
+            this.sections[type].offset = 0;
 
-            this.$http.get('/api/v1/bulletin/' + count + '/' + this.sections.bulletins.offset).then(response => {
-                this.sections.bulletins.offset = count;
+            this.$http.get('/api/v1/' + type + '/' + count + '/' + this.sections[type].offset).then(response => {
+                this.sections[type].offset = count;
             
                 if (response.body.status === "OK") {
                     this.bulletins = response.body.bulletins;
+                    this.additionalCurrentType = additional;
 
-                    this.currentSection = 'bulletins';
-                    this.currentType = 'bulletins';                    
+                    if (type === 'team') {
+                        this.currentSection = 'team';                        
+                    }else {
+                        this.currentSection = 'bulletins';                        
+                    }
+
+                    this.currentType = type;                    
                 }else {
                     this.$notify.error({
                         title: 'Error',
-                        message: 'Some error with bulletins api',
+                        message: 'Some error with ' + type + ' api',
                         duration: 10000,
                     });
                 }
@@ -292,64 +398,45 @@ Vue.component('main-page', {
 
                 this.$notify.error({
                     title: 'Error',
-                    message: 'Some error with bulletins api',
+                    message: 'Some error with ' + type + ' api',
                     duration: 10000,
                 });
              });
         },
 
-        creationsLoad: function(count = 50) {
-            this.loading = true;
-            this.hideToolTip();     
-            
-            this.sections.creations.offset = 0;
-
-            this.$http.get('/api/v1/creations/' + count + '/' + this.sections.creations.offset).then(response => {
-                this.sections.creations.offset = count;
-
-                if (response.body.status === "OK") {
-                    this.images = response.body.images;
-
-                    this.currentSection = 'images';
-                    this.currentType = 'creations';
-                }else {
-                    this.$notify.error({
-                        title: 'Error',
-                        message: 'Some error with creations api',
-                        duration: 10000,
-                    });
-                }
-                
-                this.loading = false;
-             }, response => {
-                this.loading = false;    
-
-                this.$notify.error({
-                    title: 'Error',
-                    message: 'Some error with creations api',
-                    duration: 10000,
-                });
-             });
-        },
-
-        favoritesLoad: function(count = 50) {
+        productsLoad: function(type, count = 50, menu = true, additional = '') {
             this.loading = true;
             this.hideToolTip();
+            this.showMenu = menu;
 
-            this.sections.favorites.offset = 0;
+            let subType = type;
+            this.currentProductType = type;
 
-            this.$http.get('/api/v1/favorites/' + count + '/' + this.sections.favorites.offset).then(response => {
-                this.sections.favorites.offset = count;
-                
+            this.sections.products.offset = 0;
+
+            this.$http.get('/api/v1/products/' + subType + '/' + count + '/' + this.sections.products.offset).then(response => {
+                this.sections.products.offset = count;
+
                 if (response.body.status === "OK") {
-                    this.images = response.body.images;
+                    this.products = response.body.products;
 
-                    this.currentSection = 'images';
-                    this.currentType = 'favorites';
+                    this.products.map(function (item) {
+                        item.size = item.sizes.split('|');
+                        if (item.extra_images) {
+                            item.extra = item.extra_images.split('|');
+                        }
+                        return item;
+                    });
+                    this.hideToolTip();
+                    
+                    this.additionalCurrentType = additional;                    
+
+                    this.currentSection = 'products';
+                    this.currentType = 'products';
                 }else {
                     this.$notify.error({
                         title: 'Error',
-                        message: 'Some error with favorites api',
+                        message: 'Some error with products api',
                         duration: 10000,
                     });
                 }
@@ -360,45 +447,89 @@ Vue.component('main-page', {
 
                 this.$notify.error({
                     title: 'Error',
-                    message: 'Some error with favorites api',
+                    message: 'Some error with products api',
                     duration: 10000,
                 });
              });
         },
 
-        historiesLoad: function(count = 50) {
-            this.loading = true;
-            this.hideToolTip();
+        openLocation: function() {
+            this.currentSection = 'location';
+            this.currentType = 'location';
 
-            this.sections.histories.offset = 0;
-
-            this.$http.get('/api/v1/histories/' + count + '/' + this.sections.histories.offset).then(response => {
-                this.sections.histories.offset = count;
-
-                if (response.body.status === "OK") {
-                    this.images = response.body.images;
-
-                    this.currentSection = 'images';
-                    this.currentType = 'histories';
-                }else {
-                    this.$notify.error({
-                        title: 'Error',
-                        message: 'Some error with favorites api',
-                        duration: 10000,
-                    });
+            this.bulletins = [
+                {
+                    data: 'Address',
+                    extra: '12437 Lewis Street Suite 100, Garden Grove CA 92840',
+                    num: 1
                 }
-                
-                this.loading = false;
-             }, response => {
-                this.loading = false;    
-
-                this.$notify.error({
-                    title: 'Error',
-                    message: 'Some error with favorites api',
-                    duration: 10000,
-                });
-             });
+            ]
         },
+
+        openProductCloud: function(key) {
+            this.currentProduct = this.products[key];
+
+            $("#product-cloud")
+                .css("display", "flex")
+                .hide()
+                .fadeIn(500);
+        },
+
+        openCloud: function(key) {
+            if (typeof this.bulletins[key].extra == 'undefined') {
+                this.cloudData.text = '';
+            } else {
+                this.cloudData.text = this.bulletins[key].extra;
+            }
+                this.cloudData.title = this.bulletins[key].data;
+
+            this.cloudData.open = true;
+
+            $("#def-cloud")
+                .css("display", "flex")
+                .hide()
+                .fadeIn(500);
+        },
+
+        openLocationCloud: function() {
+            $("#location-cloud")
+            .css("display", "flex")
+            .hide()
+            .fadeIn(500);
+        },
+
+        closeLocationCloud: function() {
+            $("#location-cloud")
+            .fadeOut(500);
+        },
+
+        openTeamCloud: function(key) {
+            this.teamCloudData = this.bulletins[key];
+
+            $("#team-cloud")
+                .css("display", "flex")
+                .hide()
+                .fadeIn(500);
+        },
+
+        closeTeamCloud: function () {
+            $("#team-cloud")
+            .fadeOut(500);
+        },
+
+        closeProductCloud: function () {
+            $("#product-cloud")
+            .fadeOut(500);
+        },
+
+
+        closeCloud: function () {
+            this.cloudData.open = false;
+            $(".wrap-cloud")
+            .fadeOut(500);
+        },
+
+       
 
         spiralRight: function() {
             last = Number($('.panels div:last').attr('data-pos')) - 1;
@@ -409,27 +540,25 @@ Vue.component('main-page', {
             if (this.flag) return false;
             
             if (last < 9 && !this.flag) {
-                switch (this.currentType) {
+                switch (this.currentSection) {
+                    case 'videos':
                     case 'images':
                         this.setImageToPanels(last + 1, cat_id);
-                        break;
-                    case 'creations':
-                        this.setCreationsToPanels(last + 1, cat_id);
-                        break;
-                    case 'favorites':
-                        this.setFavoritesToPanels(last + 1, cat_id);
                         break;
                     case 'bulletins':
                         this.setBulletinsToPanels(last + 1, cat_id);
                         break;
-                    case 'histories':
-                        this.setHistoriesToPanels(last + 1, cat_id);
+                    case 'products':
+                        this.setProductsToPanels(last + 1, cat_id);
+                        break;
+                    case 'instagram': 
+                        //this.setInstaToPanels(last + 1, cat_id);
                         break;
                 }
             } 
 
             if (last > 0) {
-                if (this.currentSection == 'images') {
+                if (this.currentSection == 'images' || this.currentSection == 'instagram' || this.currentSection == 'videos') {
                     ln = this.images.length;
                     images = this.images;
                     for(var i = 0; i < ln; i++) {
@@ -448,13 +577,24 @@ Vue.component('main-page', {
                     this.bulletins = bulletins;
                     
                 }
+
+                if (this.currentSection == 'products') {
+                    ln = this.products.length;
+                    products = this.products;
+                    for(var i = 0; i < ln; i++) {
+                        products[i].num -= 1;
+                    }
+
+                    this.products = products;
+                    
+                }
             }
         },
 
         spiralLeft: function() {
             first = Number($('.panels div:first-child').attr('data-pos'));
             if (first < 1) {
-                if (this.currentSection == 'images') {
+                if (this.currentSection == 'images' || this.currentSection == 'instagram' || this.currentSection == 'videos') {
                     ln = this.images.length;
                     images = this.images;
                     for(var i = 0; i < ln; i++) {
@@ -471,6 +611,16 @@ Vue.component('main-page', {
                     }
 
                     this.bulletins = bulletins;
+                    
+                }
+                if (this.currentSection == 'products') {
+                    ln = this.products.length;
+                    products = this.products;
+                    for(var i = 0; i < ln; i++) {
+                        products[i].num += 1;
+                    }
+
+                    this.products = products;
                     
                 }
             }
@@ -629,6 +779,11 @@ Vue.component('main-page', {
 
             $('#tooltip').remove();
         },
+
+        openVideo: function(code) {
+            this.openVideoIndicator = true;
+            this.currentVideoCode = code;
+        }
 
      }
 }) 

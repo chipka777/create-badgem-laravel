@@ -26,9 +26,15 @@ require('./components/Images-show');
 require('./components/Images-favorite');
 require('./components/Images-create');
 require('./components/Admin-users');
+require('./components/Admin-faq');
+require('./components/Admin-team');
+require('./components/Admin-goals');
 require('./components/Notification');
 require('./components/History');
+require('./components/products/cap');
 require('./components/site/login-page');
+require('./components/video/video');
+
 
 
 
@@ -42,6 +48,21 @@ Vue.http.interceptors.push((request, next) => {
 });
 
 Vue.use(ElementUI);
+
+import * as VueGoogleMaps from 'vue2-google-maps'
+ 
+Vue.use(VueGoogleMaps, {
+  load: {
+    key: 'AIzaSyBzlLYISGjL_ovJwAehh6ydhB56fCCpPQw',
+    libraries: 'places', // This is required if you use the Autocomplete plugin
+    // OR: libraries: 'places,drawing'
+    // OR: libraries: 'places,drawing,visualization'
+    // (as you require)
+ 
+    //// If you want to set the version, you can do so:
+    // v: '3.26',
+  },
+});
 
 const app = new Vue({
     components: {
