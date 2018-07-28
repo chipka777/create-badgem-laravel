@@ -66,6 +66,8 @@ Route::group(['prefix' => 'dashboard', 'namespace' => 'Admin', 'middleware' => '
     Route::get('/faq/{count}/{offset}', 'FAQController@getByCount');
 
     Route::resource('videos', 'VideoController');
+    Route::resource('bulletin', 'BulletinController');    
+    Route::get('/bulletin/get/{count}/{offset}', 'BulletinController@getByCount')->name('bulletin.getByCount');        
     Route::get('/videos/get/{count}/{offset}', 'VideoController@getByCount')->name('videos.cap.getByCount');    
     
     

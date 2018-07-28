@@ -9,14 +9,14 @@ use App\FavoritedImages;
 use App\UserHistory;
 use App\Category;
 use Illuminate\Support\Facades\Auth;
-
+use Validator;
 
 class ImagesController extends Controller
 {
 
     public function __construct()
     {
-        $this->middleware('role:designer|administrator')->except('showAll');
+        $this->middleware('role:designer|administrator')->except('showAll', 'store');
 
     }
     /**
@@ -51,59 +51,70 @@ class ImagesController extends Controller
      */
     public function store(Request $request, $cat_id)
     {
-        if (Auth::user()->hasRole('designer')){
+        /*if (Auth::user()->hasRole('designer')){
             $cat = Category::where('user_id', Auth::user()->id)->first();
             if (!$cat || $cat_id != $cat->id) {
                 return response()->json("Please create your category", 415);
             }
-        }
-        $type = $request->files->get('image')->getMimeType();
+        }*/
 
-        $valid = $this->validateImage($type);
-        $original_name = $request->files->get('image')->getClientOriginalName();
-        if ($valid) {
-            $path = public_path('upload');
-            $extension = $request->files->get('image')->guessExtension();
-            $name = $this->getRandomName() . '.png';            
+        if (Auth::user()->hasRole('designer') || Auth::user()->hasRole('administrator')) {
+            $validator = Validator::make($request->all(), [
+                'image' => 'required|mimes:jpeg,bmp,png,svg,jpg,gif|max:3000',
+            ]);
+    
+            if ($validator->fails()) {
+                return response()->json($validator->errors()->first(), 415);
+            }
+            $type = $request->files->get('image')->getMimeType();
+    
+            $valid = $this->validateImage($type);
+            $original_name = $request->files->get('image')->getClientOriginalName();
+            if ($valid) {
+                $path = public_path('upload');
+                $extension = $request->files->get('image')->guessExtension();
+                $name = $this->getRandomName() . '.png';            
+                
+                $request->files->get('image')->move($path, $name);
+               
+                $img = new \Imagick(realpath("upload/$name"));
+    
+                $wd = $img->getImageWidth();
+    
+                if ($wd > 400) exec("convert upload/$name -resize x400 upload/thumbs/$name");
+                else exec("convert upload/$name upload/thumbs/$name");
+    
+                //exec("convert clouds/cloud.png upload/thumbs/$name -gravity center -composite clouds/cloud.png -compose copyopacity -composite upload/thumbs/wcloud/$name");
+                //exec("convert clouds/cloud-frame.png upload/thumbs/wcloud/$name -geometry +30+10 -composite upload/thumbs/wcloud/$name");
+                $image = new Image;
+    
+                $image->name = $name;
+                $image->user_id = \Auth::user()->id;
+                $image->tags = '';
+                $image->title = $original_name;
+                $image->approved = 1;
+                if ($cat_id == 'all') $image->cat_id = 0;
+                else $image->cat_id = $cat_id;
+    
+                if ($image->save()) {
+                    $history = new UserHistory;
+    
+                    $data = [
+                        'name' => $image->title,
+                    ];
             
-            $request->files->get('image')->move($path, $name);
-           
-            $img = new \Imagick(realpath("upload/$name"));
-
-            $wd = $img->getImageWidth();
-
-            if ($wd > 400) exec("convert upload/$name -resize x400 upload/thumbs/$name");
-            else exec("convert upload/$name upload/thumbs/$name");
-
-            //exec("convert clouds/cloud.png upload/thumbs/$name -gravity center -composite clouds/cloud.png -compose copyopacity -composite upload/thumbs/wcloud/$name");
-            //exec("convert clouds/cloud-frame.png upload/thumbs/wcloud/$name -geometry +30+10 -composite upload/thumbs/wcloud/$name");
-            $image = new Image;
-
-            $image->name = $name;
-            $image->user_id = \Auth::user()->id;
-            $image->tags = '';
-            $image->title = $original_name;
-            $image->approved = 1;
-            if ($cat_id == 'all') $image->cat_id = 0;
-            else $image->cat_id = $cat_id;
-
-            if ($image->save()) {
-                $history = new UserHistory;
-
-                $data = [
-                    'name' => $image->title,
-                ];
-        
-                $history->createFromTemplate('uploaded', Auth::user(), $data);
-
-                return ['id' => $image->id, 'name' => $name]; 
-            } 
-            else return  response()->json("Error with Database", 412);
+                    $history->createFromTemplate('uploaded', Auth::user(), $data);
+    
+                    return ['id' => $image->id, 'name' => $name]; 
+                } 
+                else return  response()->json("Error with Database", 412);
+            }
+    
+            return response()->json("$original_name : Invalid image type. Acceptable: png, jpeg, svg, gif.", 415);
+        } else {
+            return response()->json("You do not have the permissions to add badges", 401);
         }
-
-      
         
-        return response()->json("$original_name : Invalid image type. Acceptable: png, jpeg, svg, gif.", 415);
 
     }
 

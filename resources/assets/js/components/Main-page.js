@@ -10,19 +10,26 @@ Vue.component('main-page', {
             offset: 0,
             flag: false,
             openVideoIndicator: false,
+            currentUploadCategory: '',
+            showAllMenu: true,
             currentVideoCode: '',
             flagMany: 0,            
             spiral: 0,
             insta: 0,
             itemsTmp: 0,
             stop: 0,
+            zoom: 17,
+            center: {lat:33.782085,lng:-117.897881},
             loading: false,
             updateDate: Date.now(),
+            preImages: [],
+            creationsList: [],
             currentSection: 'images',
             currentType: 'images',
             showMenu: true,
             lastHovered: '',     
             loadFavorited: false,
+            infoWinOpen: false,
             additionalCurrentType: '',
             cloudData: {
                 text: 'Bulletin',
@@ -285,6 +292,88 @@ Vue.component('main-page', {
             });
         },
 
+        prepareCreations: function(event) {
+            this.creationsList = event.target.files;
+            this.setImageNames();
+        },
+
+        setImageNames: function() {
+            var ln = this.creationsList.length;
+             $('.image-preview input[type="text"]').val(" ");
+            for (var key = 0; key < ln; key++) {
+                var val = $('.image-preview input[type="text"]').val(); 
+
+                $('.image-preview input[type="text"]').val( val + " " + this.creationsList[key].name + ", ");
+
+                if (key == ln-1) $('.image-preview input[type="text"]').val( val + " " + this.creationsList[key].name);
+            }
+        },
+
+        uploadCreations: function(index = 0) {
+            if (this.creationsList.length == 0) {
+                this.$notify.error({
+                    title: 'Error',
+                    message: 'Please select Images',
+                    duration: 10000,
+                });
+                return false;
+            }
+            $('#upload-progress').show();
+            if (index >= this.creationsList.length) {
+                this.creationsList = [];
+                setTimeout(this.hideProgressBar, 500);
+                this.$notify.success({
+                    title: 'Success',
+                    message: 'Images successfully uploaded',
+                    duration: 10000,
+                });
+
+                return this.imageLoad('creations', 50, false);
+            }
+
+            var data = new FormData();
+
+            data.append("image", this.creationsList[index]);
+            
+            var self = this;
+            var cat_id = this.currentUploadCategory == '' ? 0 : this.currentUploadCategory;
+
+            this.$http.post('/dashboard/images/' + cat_id, data, {
+                progress(e) {
+                    if (e.lengthComputable) {
+                        var percent = (e.loaded / e.total) * 100;
+                        self.setBeforeProgressBar(percent, index);
+                    }
+                }
+            }).then(response => {
+                ++index;
+                this.uploadCreations(index);
+            }, response => {
+                this.$notify.error({
+                    title: 'Error',
+                    message: response.body,
+                    duration: 10000,
+                });
+                setTimeout(this.hideProgressBar, 500);
+            });
+              
+        },
+
+        setBeforeProgressBar: function(percent, index) {
+            var wd =  (index/ this.creationsList.length) * 100;
+
+            wd += ((percent/100) * (1/ this.creationsList.length)) * 100; 
+            $('#upload-progress>.progress-bar').attr('style', 'width: ' + wd + '%');
+        },
+        
+
+        hideProgressBar: function() {
+            $('#upload-progress').hide();
+           
+            $('#upload-progress>.progress-bar').attr('style', 'width: 0%');
+        },
+        
+
         homeLoad: function() {
             this.getImages();
         },
@@ -492,10 +581,13 @@ Vue.component('main-page', {
         },
 
         openLocationCloud: function() {
-            $("#location-cloud")
-            .css("display", "flex")
-            .hide()
-            .fadeIn(500);
+            this.currentSection = 'location';
+            this.currentType = 'location';
+            this.showAllMenu = false;
+        },
+
+        changeMenuState: function() {
+            this.showAllMenu = !this.showAllMenu;
         },
 
         closeLocationCloud: function() {
@@ -783,6 +875,14 @@ Vue.component('main-page', {
         openVideo: function(code) {
             this.openVideoIndicator = true;
             this.currentVideoCode = code;
+        },
+        markerClick: function() {
+            this.zoom = 17;
+            this.center = {lat:33.782085,lng:-117.897881};
+            this.$refs.gmap.$mapObject.setZoom(this.zoom );
+            this.$refs.gmap.$mapObject.setCenter(this.center);     
+            this.infoWinOpen = true;       
+
         }
 
      }

@@ -161,9 +161,11 @@ class VideoController extends Controller
             } else {
                 $delete = true;
             }
-        } elseif ($thumbnail !== 'api') {
+        } elseif ($thumbnail === true) {
             $thumbnail = $this->saveImage($request);
             $delete = true;            
+        } else {
+            $thumbnail = $video->thumbnail;
         }
 
         $path = $this::PUBLIC_DIR . basename($video->thumbnail);

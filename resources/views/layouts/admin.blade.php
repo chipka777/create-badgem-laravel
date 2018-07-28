@@ -116,6 +116,15 @@
 
 							@role('administrator')
 								<li>
+									<a href="{{ route('bulletin.index') }}" class="{{ ($page == 'bulletins') ? 'active' : null }}">
+										<i class="fa fa-address-card-o" aria-hidden="true"></i>
+										<span>Bulletins</span>
+									</a>
+								</li>
+							@endrole
+
+							@role('administrator')
+								<li>
 									<a href="#products" class="collapsed {{ ($page == 'products') ? 'active' : null }}" data-toggle="collapse" aria-expanded= "false">
 										<i class="fa fa-shopping-cart" aria-hidden="true"></i>
 											<span>Products</span>

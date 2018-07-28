@@ -217,7 +217,7 @@ class CapController extends Controller
         } 
 
         if ($wd > 150) {
-            exec("convert " . $this::PUBLIC_DIR . "$name -resize x150 " . $this::TMP_DIR . "/$name");
+            exec("convert " . $this::PUBLIC_DIR . "$name -resize x300 " . $this::TMP_DIR . "/$name");
         }else {
             exec("convert " . $this::PUBLIC_DIR . "$name  " . $this::TMP_DIR . "/$name");
         }

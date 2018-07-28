@@ -23,8 +23,9 @@ html, body {
 	overflow: hidden;
 	overflow-x: hidden;
 	/*background: url(../img/badgem-blackbg.jpg) 0 0 repeat;*/
-	background-image: url(../img/main-back.png);
-	background-color: #000000;
+	/*background-image: url(../img/main-back.png);*/
+	background-image: url(../img/site-background.png);	
+	background-color: #ffffff;
 	background-size: cover;
 	width: 100%;
 	-moz-user-select: none;

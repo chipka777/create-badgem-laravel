@@ -432,17 +432,17 @@ function savePDF() {
 }
 
 $(document).ready(function() {
-    $('.main-menu-layer3').attr('style', 'height : ' + ($('.main-navigation-2').height() * 1.5 + 50) + 'px')    
+    /*$('.main-menu-layer3').attr('style', 'height : ' + ($('.main-navigation-2').height() * 1.5 + 50) + 'px')    
     setTimeout(function() {
        // $('.button-nav').height($('.button-nav').height());
-    }, 300);
+    }, 300);*/
 
 })
 
 
 $(window).resize(function() {
-    $('.main-menu-layer3').width($('.main-navigation-2').width());
-    $('.main-menu-layer3').attr('style', 'height : ' + ($('.main-navigation-2').height() * 1.5 + 40) + 'px')
+    //$('.main-menu-layer3').width($('.main-navigation-2').width());
+    //$('.main-menu-layer3').attr('style', 'height : ' + ($('.main-navigation-2').height() * 1.5 + 40) + 'px')
     //$('.button-nav').attr('style','height:auto');    
     //$('.button-nav').height($('.button-nav').height());
 })

@@ -29,6 +29,7 @@ require('./components/Admin-users');
 require('./components/Admin-faq');
 require('./components/Admin-team');
 require('./components/Admin-goals');
+require('./components/Admin-bulletin');
 require('./components/Notification');
 require('./components/History');
 require('./components/products/cap');
