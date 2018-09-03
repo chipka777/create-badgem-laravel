@@ -436,8 +436,11 @@ $(document).ready(function() {
     setTimeout(function() {
        // $('.button-nav').height($('.button-nav').height());
     }, 300);*/
+	
+})//-- usage --//
 
-})
+
+
 
 
 $(window).resize(function() {

@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Auth;
 use Illuminate\Http\Request;
 use Mail;
 use App\User;
+use App\UserInvites;
 use App\UserMeta;
 use App\Http\Controllers\Controller;
 use Illuminate\Support\Facades\Validator;
@@ -56,6 +57,7 @@ class RegisterController extends Controller
             'name' => 'required|string|max:255',
             'email' => 'required|string|email|max:255|unique:users',
             'password' => 'required|string|min:6|confirmed',
+            'invite_code' => 'required'
         ]);
     }
 
@@ -65,15 +67,19 @@ class RegisterController extends Controller
      * @param  array  $data
      * @return \App\User
      */
-    protected function create(array $data)
+    protected function create(array $data, $invite)
     {
         $user =  User::create([
             'name' => $data['name'],
             'email' => $data['email'],
             'password' => bcrypt($data['password']),
-            'verify_code' => strtoupper(str_random(40))
-    
+            'verify_code' => strtoupper(str_random(40)),
         ]);
+        $user->settings()->create([
+            'invited_by' => $invite->user_id,
+            'invites' => 10
+        ]);
+
         $user->meta()->create([
             'user_id' => $user->id,
             'first_name' => $data['first_name'],
@@ -92,8 +98,20 @@ class RegisterController extends Controller
             return json_encode(['status' => 'ERROR', 'errors' => $validator->errors()->first()]);
         }
 
-        $user = $this->create($request->all());
-        
+        $userInvite = UserInvites::where('email', $request->email)
+            ->where('code', $request->invite_code)
+            ->first();
+
+        if ($userInvite === null) {
+            return json_encode(['status' => 'ERROR', 'errors' => 'Invalid invitation code']);            
+        }
+
+        $user = $this->create($request->all(), $userInvite);
+
+        UserInvites::where('email', $request->email)
+            ->where('code', $request->invite_code)
+            ->delete();
+
         session(['user' => $user]);
 
         $this->sendActivationMail($user);

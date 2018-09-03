@@ -29,9 +29,19 @@ class User extends Authenticatable
         'password', 'remember_token',
     ];
 
+    public function accounts()
+    {
+        return $this->hasMany(LinkedSocialAccount::class);
+    }
+
     public function meta()
     {
         return $this->hasOne(UserMeta::class);
+    }
+
+    public function settings()
+    {
+        return $this->hasOne(UserSettings::class);
     }
 
     public function category()

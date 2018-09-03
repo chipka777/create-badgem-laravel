@@ -15756,7 +15756,7 @@ Vue.use(__WEBPACK_IMPORTED_MODULE_0_element_ui___default.a);
 
 Vue.use(__WEBPACK_IMPORTED_MODULE_1_vue2_google_maps__, {
     load: {
-        key: 'AIzaSyBzlLYISGjL_ovJwAehh6ydhB56fCCpPQw',
+        key: 'AIzaSyCOSXw8E-sxYsWPuVWG2xmXx0U-Ay78ZOk',
         libraries: 'places' // This is required if you use the Autocomplete plugin
         // OR: libraries: 'places,drawing'
         // OR: libraries: 'places,drawing,visualization'
@@ -28127,18 +28127,29 @@ Vue.component('main-page', {
             insta: 0,
             itemsTmp: 0,
             stop: 0,
+            userInvites: 0,
             zoom: 17,
             center: { lat: 33.782085, lng: -117.897881 },
             loading: false,
             updateDate: Date.now(),
             preImages: [],
             creationsList: [],
+            avatarPreview: 'logo-phase2.png',
             currentSection: 'images',
             currentType: 'images',
+            avatarView: false,
             showMenu: true,
             lastHovered: '',
             loadFavorited: false,
             infoWinOpen: false,
+            ageEdit: false,
+            nameEdit: false,
+            bioEdit: false,
+            arrowEnable: true,
+            recEmail: '',
+            inviteSend: false,
+            currentMenuSection: 'onlycenter',
+            addRoute: '',
             additionalCurrentType: '',
             cloudData: {
                 text: 'Bulletin',
@@ -28203,8 +28214,11 @@ Vue.component('main-page', {
         }
     },
     mounted: function mounted() {
+        this.avatarPreview = $('.avatar-src').text();
         this.getImages();
         this.getCategories();
+
+        this.userInvites = $('.user-invites').val();
     },
     methods: {
         getCategories: function getCategories() {
@@ -28227,17 +28241,32 @@ Vue.component('main-page', {
 
             if (cat_id == '0') cat_id = 'all';
             this.loading = true;
+            var self = this;
             this.sections.images.offset = 0;
-            this.showMenu = menu;
 
             this.hideToolTip();
 
             this.$http.get('/api/v1/images/' + cat_id + '/' + count + '/0').then(function (response) {
                 _this2.currentSection = 'images';
                 _this2.currentType = 'images';
+                _this2.showMenu = menu;
+                _this2.arrowEnable = true;
+
                 _this2.additionalCurrentType = additional;
 
-                _this2.images = response.data;
+                _this2.images = response.data.map(function (item) {
+                    item.tmpName = item.name;
+                    item.name = 'logo-phase2.gif';
+
+                    return item;
+                });
+
+                setTimeout(function () {
+                    self.images.map(function (item) {
+                        item.name = item.tmpName;
+                        return item;
+                    });
+                }, 500);
                 _this2.sections.images.offset = count;
                 _this2.loading = false;
             }, function (response) {
@@ -28338,7 +28367,7 @@ Vue.component('main-page', {
 
             this.hideToolTip();
 
-            this.$http.get('/api/v1/' + this.currentType + '/20/' + this.sections[this.currentType].offset).then(function (response) {
+            this.$http.get('/api/v1/' + this.currentType + this.addRoute + '/20/' + this.sections[this.currentType].offset).then(function (response) {
                 _this5.sections[_this5.currentType].offset += 20;
 
                 bulletins = response.data.bulletins;
@@ -28515,17 +28544,31 @@ Vue.component('main-page', {
 
             this.loading = true;
             this.hideToolTip();
-            this.showMenu = true;
 
-            this.currentSection = 'instagram';
-            this.currentType = 'instagram';
+            this.images = this.defaultInsta;
 
+            var self = this;
             this.sections.instagram.max_id = 0;
 
             this.$http.post('/api/v1/images/instagram', { max_id: this.sections.instagram.max_id, count: 50 }).then(function (response) {
                 if (response.body.status === "OK") {
-                    _this8.images = response.body.images;
+                    _this8.showMenu = true;
+                    _this8.arrowEnable = true;
+                    _this8.currentSection = 'instagram';
+                    _this8.currentType = 'instagram';
+                    _this8.images = response.body.images.map(function (item) {
+                        item.tmpName = item.name;
+                        item.name = 'upload/thumbs/logo-phase2.gif';
+
+                        return item;
+                    });
                     _this8.hideToolTip();
+                    setTimeout(function () {
+                        self.images.map(function (item) {
+                            item.name = item.tmpName;
+                            return item;
+                        });
+                    }, 500);
 
                     _this8.sections.instagram.max_id = response.body.max_id;
                 } else {
@@ -28559,17 +28602,33 @@ Vue.component('main-page', {
 
             this.loading = true;
             this.hideToolTip();
-            this.showMenu = menu;
-
             this.sections[type].offset = 0;
+            var self = this;
 
             this.$http.get('/api/v1/' + type + '/' + count + '/' + this.sections[type].offset).then(function (response) {
                 _this9.sections[type].offset = count;
+                _this9.arrowEnable = true;
+                _this9.showMenu = menu;
 
                 if (response.body.status === "OK") {
-                    _this9.images = response.body.images;
+                    _this9.images = response.body.images.map(function (item) {
+                        item.tmpName = item.name;
+                        item.name = 'logo-phase2.gif';
+                        item.tmpNail = item.thumbnail;
+                        item.thumbnail = 'upload/thumbs/logo-phase2.gif';
+
+                        return item;
+                    });
                     _this9.additionalCurrentType = additional;
                     _this9.hideToolTip();
+
+                    setTimeout(function () {
+                        self.images.map(function (item) {
+                            item.name = item.tmpName;
+                            item.thumbnail = item.tmpNail;
+                            return item;
+                        });
+                    }, 500);
 
                     _this9.currentSection = currentSection;
                     _this9.currentType = type;
@@ -28593,46 +28652,238 @@ Vue.component('main-page', {
             });
         },
 
-        bulletinLoad: function bulletinLoad(type) {
-            var count = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : 50;
+        settingsOpen: function settingsOpen() {
+            this.showMenu = false;
+            this.arrowEnable = false;
+            this.currentSection = 'settings';
+        },
 
+        editAge: function editAge() {
+            this.ageEdit = true;
+        },
+
+        editName: function editName() {
+            this.nameEdit = true;
+            $('.js-name').focus();
+        },
+
+        editBio: function editBio() {
+            this.bioEdit = true;
+        },
+
+        avatarChange: function avatarChange() {
             var _this10 = this;
 
+            var data = new FormData();
+
+            data.append('avatar', $('.avatar-input')[0].files[0]);
+
+            this.loading = true;
+
+            this.$http.post('/api/v1/settings/avatar', data).then(function (response) {
+                _this10.loading = false;
+                _this10.bioEdit = false;
+                _this10.avatarPreview = response.body.avatar;
+                $('.avatar-input').val('');
+                $('.avatar-view-preview').attr('src', 'upload/avatars/' + response.body.avatar);
+
+                _this10.$notify.success({
+                    title: 'Success',
+                    message: 'Avatar has been successfully updated',
+                    duration: 10000
+                });
+            }, function (response) {
+                _this10.loading = false;
+                if (response.status === 422) {
+                    return _this10.$notify.error({
+                        title: 'Error',
+                        message: response.body.message,
+                        duration: 10000
+                    });
+                }
+
+                _this10.$notify.error({
+                    title: 'Error',
+                    message: 'Some error with settings api',
+                    duration: 10000
+                });
+            });
+        },
+
+        saveBio: function saveBio() {
+            var _this11 = this;
+
+            var bio = $('.js-bio').val();
+
+            if (bio === '') {
+                return this.$notify.error({
+                    title: 'Error',
+                    message: 'Invalid biography',
+                    duration: 10000
+                });
+            }
+
+            this.loading = true;
+
+            this.$http.post('/api/v1/settings/bio', { bio: bio }).then(function (response) {
+                _this11.loading = false;
+                _this11.bioEdit = false;
+
+                $('.js-bio').text(response.body.bio);
+                $('.js-s-bio').text(response.body.croppBio);
+
+                _this11.$notify.success({
+                    title: 'Success',
+                    message: 'Bio has been successfully updated',
+                    duration: 10000
+                });
+            }, function (response) {
+                _this11.loading = false;
+
+                _this11.$notify.error({
+                    title: 'Error',
+                    message: 'Some error with settings api',
+                    duration: 10000
+                });
+            });
+        },
+
+        saveName: function saveName() {
+            var _this12 = this;
+
+            var name = $('.js-name').val();
+
+            if (name === '') {
+                return this.$notify.error({
+                    title: 'Error',
+                    message: 'Invalid name',
+                    duration: 10000
+                });
+            }
+
+            this.loading = true;
+
+            this.$http.post('/api/v1/settings/name', { name: name }).then(function (response) {
+                _this12.loading = false;
+                _this12.nameEdit = false;
+
+                $('.js-s-username').text(response.body.name);
+
+                _this12.$notify.success({
+                    title: 'Success',
+                    message: 'Name has been successfully updated',
+                    duration: 10000
+                });
+            }, function (response) {
+                _this12.loading = false;
+
+                _this12.$notify.error({
+                    title: 'Error',
+                    message: 'Some error with settings api',
+                    duration: 10000
+                });
+            });
+        },
+
+        saveAge: function saveAge() {
+            var _this13 = this;
+
+            var day = $('.js-age-day').val(),
+                month = $('.js-age-month').val(),
+                year = $('.js-age-year').val(),
+                date = month + '-' + day + '-' + year,
+                dateObj = new Date(month + '-' + day + '-' + year);
+
+            if (dateObj === 'Invalid Date') {
+                return this.$notify.error({
+                    title: 'Error',
+                    message: 'Invalid date',
+                    duration: 10000
+                });
+            }
+
+            this.loading = true;
+
+            this.$http.post('/api/v1/settings/age', { date: date }).then(function (response) {
+                _this13.loading = false;
+                _this13.ageEdit = false;
+                $('.js-age-day').val(day);
+                $('.js-age-month').val(month);
+                $('.js-age-year').val(year);
+
+                $('.js-age').text(response.body.age);
+
+                _this13.$notify.success({
+                    title: 'Success',
+                    message: 'Age has been successfully updated',
+                    duration: 10000
+                });
+            }, function (response) {
+                _this13.loading = false;
+
+                _this13.$notify.error({
+                    title: 'Error',
+                    message: 'Some error with settings api',
+                    duration: 10000
+                });
+            });
+        },
+
+        bulletinLoad: function bulletinLoad(type) {
+            var count = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : 50;
             var menu = arguments.length > 2 && arguments[2] !== undefined ? arguments[2] : true;
+
+            var _this14 = this;
+
             var additional = arguments.length > 3 && arguments[3] !== undefined ? arguments[3] : '';
+            var addRoute = arguments.length > 4 && arguments[4] !== undefined ? arguments[4] : '';
 
             this.loading = true;
             this.hideToolTip();
-            this.showMenu = menu;
             this.sections[type].offset = 0;
+            var self = this;
 
-            this.$http.get('/api/v1/' + type + '/' + count + '/' + this.sections[type].offset).then(function (response) {
-                _this10.sections[type].offset = count;
+            this.$http.get('/api/v1/' + type + addRoute + '/' + count + '/' + this.sections[type].offset).then(function (response) {
+                _this14.sections[type].offset = count;
+                _this14.arrowEnable = true;
+                _this14.showMenu = menu;
 
                 if (response.body.status === "OK") {
-                    _this10.bulletins = response.body.bulletins;
-                    _this10.additionalCurrentType = additional;
+                    _this14.bulletins = response.body.bulletins.map(function (item) {
+                        //item.tmpImage = item.image;
+                        //item.image = 'logo-phase2.gif';
+
+                        return item;
+                    });
+                    _this14.additionalCurrentType = additional;
+                    _this14.addRoute = addRoute;
 
                     if (type === 'team') {
-                        _this10.currentSection = 'team';
+                        _this14.currentSection = 'team';
+                        setTimeout(function () {
+                            self.bulletins.map(function (item) {
+                                //item.image = item.tmpImage;
+                                return item;
+                            });
+                        }, 500);
                     } else {
-                        _this10.currentSection = 'bulletins';
+                        _this14.currentSection = 'bulletins';
                     }
 
-                    _this10.currentType = type;
+                    _this14.currentType = type;
                 } else {
-                    _this10.$notify.error({
+                    _this14.$notify.error({
                         title: 'Error',
                         message: 'Some error with ' + type + ' api',
                         duration: 10000
                     });
                 }
 
-                _this10.loading = false;
+                _this14.loading = false;
             }, function (response) {
-                _this10.loading = false;
+                _this14.loading = false;
 
-                _this10.$notify.error({
+                _this14.$notify.error({
                     title: 'Error',
                     message: 'Some error with ' + type + ' api',
                     duration: 10000
@@ -28643,52 +28894,60 @@ Vue.component('main-page', {
         productsLoad: function productsLoad(type) {
             var count = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : 50;
 
-            var _this11 = this;
+            var _this15 = this;
 
             var menu = arguments.length > 2 && arguments[2] !== undefined ? arguments[2] : true;
             var additional = arguments.length > 3 && arguments[3] !== undefined ? arguments[3] : '';
 
             this.loading = true;
             this.hideToolTip();
-            this.showMenu = menu;
-
             var subType = type;
             this.currentProductType = type;
-
+            var self = this;
             this.sections.products.offset = 0;
 
             this.$http.get('/api/v1/products/' + subType + '/' + count + '/' + this.sections.products.offset).then(function (response) {
-                _this11.sections.products.offset = count;
+                _this15.sections.products.offset = count;
+                _this15.arrowEnable = true;
+                _this15.showMenu = menu;
 
                 if (response.body.status === "OK") {
-                    _this11.products = response.body.products;
+                    _this15.products = response.body.products;
 
-                    _this11.products.map(function (item) {
+                    _this15.products.map(function (item) {
+                        item.tmp = item.photo_wcloud;
+                        item.photo_wcloud = 'upload/thumbs/logo-phase2.gif';
                         item.size = item.sizes.split('|');
                         if (item.extra_images) {
                             item.extra = item.extra_images.split('|');
                         }
                         return item;
                     });
-                    _this11.hideToolTip();
+                    _this15.hideToolTip();
 
-                    _this11.additionalCurrentType = additional;
+                    setTimeout(function () {
+                        self.products.map(function (item) {
+                            item.photo_wcloud = item.tmp;
+                            return item;
+                        });
+                    }, 500);
+                    _this15.additionalCurrentType = additional;
 
-                    _this11.currentSection = 'products';
-                    _this11.currentType = 'products';
+                    _this15.currentSection = 'products';
+                    _this15.currentType = 'products';
                 } else {
-                    _this11.$notify.error({
+                    _this15.$notify.error({
                         title: 'Error',
                         message: 'Some error with products api',
                         duration: 10000
                     });
                 }
 
-                _this11.loading = false;
+                _this15.loading = false;
             }, function (response) {
-                _this11.loading = false;
+                _this15.loading = false;
 
-                _this11.$notify.error({
+                _this15.$notify.error({
                     title: 'Error',
                     message: 'Some error with products api',
                     duration: 10000
@@ -28773,6 +29032,7 @@ Vue.component('main-page', {
                     case 'images':
                         this.setImageToPanels(last + 1, cat_id);
                         break;
+                    case 'team':
                     case 'bulletins':
                         this.setBulletinsToPanels(last + 1, cat_id);
                         break;
@@ -28795,7 +29055,7 @@ Vue.component('main-page', {
                     this.images = images;
                 }
 
-                if (this.currentSection == 'bulletins') {
+                if (this.currentSection == 'bulletins' || this.currentSection == 'team') {
                     ln = this.bulletins.length;
                     bulletins = this.bulletins;
                     for (var i = 0; i < ln; i++) {
@@ -28829,7 +29089,7 @@ Vue.component('main-page', {
 
                     this.images = images;
                 }
-                if (this.currentSection == 'bulletins') {
+                if (this.currentSection == 'bulletins' || this.currentSection == 'team') {
                     ln = this.bulletins.length;
                     bulletins = this.bulletins;
                     for (var i = 0; i < ln; i++) {
@@ -28913,8 +29173,51 @@ Vue.component('main-page', {
             });
         },
 
+        sendInvite: function sendInvite() {
+            var _this16 = this;
+
+            if (this.recEmail === '') {
+                return this.$notify.error({
+                    title: 'Error',
+                    message: 'Email is required field',
+                    duration: 10000
+                });
+            }
+            this.loading = true;
+
+            this.$http.post('/api/v1/invite/send', { email: this.recEmail }).then(function (response) {
+                _this16.loading = false;
+                _this16.inviteSend = false;
+
+                _this16.$notify.success({
+                    title: 'Success',
+                    message: 'Invite was sent successfully',
+                    duration: 10000
+                });
+                _this16.userInvites = response.body.invites;
+
+                console.log(response.body.invites);
+            }, function (response) {
+                _this16.loading = false;
+
+                if (response.status === 422) {
+                    _this16.$notify.error({
+                        title: 'Error',
+                        message: response.body.message,
+                        duration: 10000
+                    });
+                } else {
+                    _this16.$notify.error({
+                        title: 'Error',
+                        message: 'Some error with invites api',
+                        duration: 10000
+                    });
+                }
+            });
+        },
+
         addToFavorited: function addToFavorited(id, key) {
-            var _this12 = this;
+            var _this17 = this;
 
             if (this.loadFavorited) return false;
             if (this.images[key].favorite === true) return this.removeFromFavorited(id, key);
@@ -28922,18 +29225,18 @@ Vue.component('main-page', {
             this.loadFavorited = true;
 
             this.$http.get('/api/v1/images/add-to-favorite/' + id).then(function (response) {
-                _this12.images[key].favorite = true;
-                _this12.loadFavorited = false;
+                _this17.images[key].favorite = true;
+                _this17.loadFavorited = false;
 
-                _this12.$notify.success({
+                _this17.$notify.success({
                     title: 'Success',
                     message: 'This badge was successfully added to favorites',
                     duration: 10000
                 });
             }, function (response) {
-                _this12.loadFavorited = false;
+                _this17.loadFavorited = false;
 
-                _this12.$notify.error({
+                _this17.$notify.error({
                     title: 'Error',
                     message: 'Some error with favorites api',
                     duration: 10000
@@ -28942,7 +29245,7 @@ Vue.component('main-page', {
         },
 
         removeFromFavorited: function removeFromFavorited(id, key) {
-            var _this13 = this;
+            var _this18 = this;
 
             if (this.loadFavorited) return false;
 
@@ -28950,18 +29253,18 @@ Vue.component('main-page', {
             this.loadFavorited = true;
 
             this.$http.get('/api/v1/images/remove-from-favorite/' + id).then(function (response) {
-                _this13.images[key].favorite = false;
-                _this13.loadFavorited = false;
+                _this18.images[key].favorite = false;
+                _this18.loadFavorited = false;
 
-                _this13.$notify.success({
+                _this18.$notify.success({
                     title: 'Success',
                     message: 'This badge was successfully removed from favorites',
                     duration: 10000
                 });
             }, function (response) {
-                _this13.loadFavorited = false;
+                _this18.loadFavorited = false;
 
-                _this13.$notify.error({
+                _this18.$notify.error({
                     title: 'Error',
                     message: 'Some error with favorites api',
                     duration: 10000
@@ -30092,6 +30395,7 @@ Vue.component('admin-team', {
         editMemberOpen: function editMemberOpen(key) {
             this.editModal = true;
             this.edit = this.teams[key];
+            $('#editAvatar').val('');
         },
 
         deleteMemberOpen: function deleteMemberOpen(key) {
@@ -30157,6 +30461,7 @@ Vue.component('admin-team', {
             data.append("firstName", this.edit.first_name);
             data.append("lastName", this.edit.last_name);
             data.append("description", this.edit.description);
+            data.append("type", this.edit.type);
 
             this.$http.post('team/' + this.edit.id, data).then(function (response) {
                 _this3.loading = false;
@@ -30228,6 +30533,7 @@ Vue.component('admin-team', {
             data.append("firstName", this.create.firstName);
             data.append("lastName", this.create.lastName);
             data.append("description", this.create.description);
+            data.append("type", this.create.type);
 
             this.$http.post('team', data).then(function (response) {
                 _this4.loading = false;
@@ -30924,7 +31230,7 @@ Vue.component('product-cap', {
 /***/ (function(module, exports) {
 
 Vue.component('login-page', {
-    props: ['user'],
+    props: ['user', 'error'],
     data: function data() {
         return {
             currentSection: 'login',
@@ -30941,7 +31247,8 @@ Vue.component('login-page', {
                 last_name: '',
                 email: '',
                 password: '',
-                password_confirmation: ''
+                password_confirmation: '',
+                invite_code: ''
             },
             activateForm: {
                 code: ''
@@ -30953,6 +31260,14 @@ Vue.component('login-page', {
     },
     mounted: function mounted() {
         if (this.user) this.currentSection = "activate";
+
+        if (this.error) {
+            this.$notify.error({
+                title: 'Error',
+                message: this.error,
+                duration: 30000
+            });
+        }
     },
 
     methods: {
@@ -31008,6 +31323,7 @@ Vue.component('login-page', {
             data.append('email', this.registerForm.email);
             data.append('password', this.registerForm.password);
             data.append('password_confirmation', this.registerForm.password_confirmation);
+            data.append('invite_code', this.registerForm.invite_code);
 
             this.$http.post('/register', data).then(function (response) {
                 _this2.loading = false;

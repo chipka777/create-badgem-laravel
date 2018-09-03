@@ -330,7 +330,7 @@ width: 28%;
 	position: absolute;
 	top: 0;
 	left: 0;
-	/* overflow: hidden; */
+	overflow: hidden;
 	height: 100%;
 }
 .panel {
@@ -854,12 +854,12 @@ width: 28%;
 .pos2 {
 	display: flex;	
 	top: 68%;
-	left: 58%;
+	left: 51%;
 }
 .pos3 {
 	display: flex;	
 	top: 68%;
-	left: 18%;
+	left: 21%;
 }
 .pos4 {
 	display: flex;	
@@ -1009,39 +1009,39 @@ button:focus {
  }
 }
 @media screen and (max-width: 1099px) and (min-width: 925px) {
-	.main {
+	/*.main {
 
 		height: 16%;
 		top: 40% !important;
-	}
+	}*/
 }
 @media screen and (max-width: 924px) and (min-width: 768px) {
-.main {
+/*.main {
 	height: 14%;
 	top: 40% !important;
-}
+}*/
 .top-btn {
 	 margin-top: 9px !important;
  }
 }
 @media screen and (max-width:767px) and (min-width: 481px) {
-.main {
+/*.main {
 	height: 20%;
 	top: 40% !important;
 	border:0!important;
 	background:transparent!important;
 	box-shadow:0 0 0 0!important;
-}
+}*/
 }
 @media screen and (max-width:480px) and (min-width: 320px) {
-.main {
+/*.main {
 	border:0;
 	background:transparent!important;
 	box-shadow:0 0 0 0!important;
 	height: 20%;
 	top: 41% !important;
 	padding: 1%;
-}
+}*/
 }
 
 .canva-img img {

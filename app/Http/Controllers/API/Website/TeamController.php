@@ -29,4 +29,35 @@ class TeamController extends Controller
             'status' => 'OK'
         ]);
     }
+
+    public function getTeamMembersByCategory($cat, $count, $offset)
+    {
+        $data = [];
+
+        if ($cat == 0) {
+            $query = Team::offset($offset)
+                ->limit($count)
+                ->orderBy('created_at', 'desc');
+        } else {
+            $query = Team::where('type', $cat)
+                ->offset($offset)
+                ->limit($count)
+                ->orderBy('created_at', 'desc');
+        }
+
+        
+
+        $team = $query->get()
+            ->map(function ($member, $key) use (&$data) {
+                $member->num = $key + 1;
+
+                return $member;
+            });
+
+        return response()->json([
+            'bulletins' => $team,
+            'count'  => $query->count(),
+            'status' => 'OK'
+        ]);
+    }
 }

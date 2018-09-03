@@ -1,5 +1,5 @@
 Vue.component('login-page', {
-    props: ['user'],
+    props: ['user', 'error'],
     data: function () {
         return {
             currentSection: 'login',
@@ -17,6 +17,7 @@ Vue.component('login-page', {
                 email: '',
                 password: '',
                 password_confirmation: '',
+                invite_code: ''
             },
             activateForm: {
                 code: '',
@@ -28,6 +29,14 @@ Vue.component('login-page', {
     },
     mounted() {
         if (this.user) this.currentSection = "activate";
+
+        if (this.error) {
+            this.$notify.error({
+                title: 'Error',
+                message: this.error,
+                duration: 30000,
+              });
+        }
     },
     methods: {
         login: function(form) {
@@ -79,6 +88,7 @@ Vue.component('login-page', {
             data.append('email', this.registerForm.email);
             data.append('password', this.registerForm.password);
             data.append('password_confirmation', this.registerForm.password_confirmation);
+            data.append('invite_code', this.registerForm.invite_code);            
             
             this.$http.post('/register', data).then(response => {
                 this.loading = false;

@@ -56,6 +56,7 @@ Vue.component('admin-team', {
         editMemberOpen: function(key) {
             this.editModal = true;
             this.edit = this.teams[key];
+			$('#editAvatar').val('');
         },
 
         deleteMemberOpen: function(key) {
@@ -117,7 +118,8 @@ Vue.component('admin-team', {
             data.append("image", this.edit.image);
             data.append("firstName", this.edit.first_name);
             data.append("lastName", this.edit.last_name);          
-            data.append("description", this.edit.description);     
+            data.append("description", this.edit.description);
+            data.append("type", this.edit.type);        
 
             this.$http.post('team/' + this.edit.id, data).then(response => {
                 this.loading = false;
@@ -188,7 +190,8 @@ Vue.component('admin-team', {
             data.append("image", this.create.avatar);
             data.append("firstName", this.create.firstName);
             data.append("lastName", this.create.lastName);          
-            data.append("description", this.create.description);                          
+            data.append("description", this.create.description);  
+            data.append("type", this.create.type);                                                  
 
             this.$http.post('team', data).then(response => {
                 this.loading = false;

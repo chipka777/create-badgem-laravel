@@ -23,7 +23,12 @@ class TeamController extends Controller
         $team = Team::offset($offset)
         ->limit($count)
         ->orderBy('created_at', 'desc')
-        ->get();
+        ->get()
+        ->map(function($member) {
+            $member->type = $member->getType();
+            
+            return $member;
+        });
 
         return json_encode([
             'team' => $team,
@@ -81,6 +86,7 @@ class TeamController extends Controller
                 'last_name'   => $request->lastName,
                 'description' => $request->description,
                 'image'       => $name,
+                'type' => $request->type,
             ]);
 
             return json_encode([
@@ -138,6 +144,16 @@ class TeamController extends Controller
                 $name = str_random(10) . '.png';            
                 
                 $request->files->get('image')->move($path, $name);
+				
+				$img = new \Imagick(realpath("upload/team/$name"));
+
+				$wd = $img->getImageWidth();
+
+				if ($wd > 400) exec("convert upload/team/$name -resize x400 upload/team/thumbs/$name");
+				else exec("convert upload/team/$name upload/team/thumbs/$name");
+
+				exec("convert clouds/cloud.png upload/team/thumbs/$name -gravity center -composite clouds/cloud.png -compose copyopacity -composite upload/team/thumbs/$name");
+				exec("convert clouds/cloud-frame.png upload/team/thumbs/$name -geometry +30+10 -composite upload/team/thumbs/$name");
 
                 $member->image = $name;
 
@@ -158,6 +174,7 @@ class TeamController extends Controller
             'last_name'   => $request->lastName,
             'description' => $request->description,
             'image'       => $member->image,
+            'type' => $request->type,
         ]);
 
         return json_encode([

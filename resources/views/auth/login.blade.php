@@ -2,19 +2,27 @@
 
 @section('content')
 <div id="app" v-cloak>
-    <login-page inline-template :user="{{ session('user') ? 'true' : 'false' }}">
+    <login-page inline-template :user="{{ session('user') ? 'true' : 'false' }}" :error="'{{ session()->get('error') }}'">
         <div class="main-navigation-wrap">
             <div class="main main-navigation"  v-loading="loading">
                 <div id="members-section" v-if="currentSection == 'login'">
                     <span class="title">HELLO, welcome to Badge`m </br> Would you like to?</span>
                     <form class="form-member-post" method="POST" action="{{ route('login') }}">
                         {{ csrf_field() }}
-                        <div class="member-form-buttons">
+                        <div class="member-form-buttons" style="display: inline-block">
                             <div class="form-group">
                                 <input class="member-submit login-btn" type="button" value="LOGIN" @click="login">
                             </div>
                             <div class="form-group">
                                 <input class="member-submit" type="button" value="REGISTER" @click="activeUser ? currentSection = 'activate' : currentSection = 'register'">
+                            </div>
+                        </div>
+                        <div class="member-form-buttons" style="display: inline-block">
+                            <div class="form-group">
+                                <a href="/login/facebook/" style="text-decoration: none"><input class="member-submit facebook-btn" type="button" value="FACEBOOK" style="background-color: #6eb9ea;color: white;"></a>
+                            </div>
+                            <div class="form-group">
+                                <a href="/login/google/" style="text-decoration: none"><input class="member-submit google-btn" type="button" value="GOOGLE" style="background-color: #ea736e;color: white;"></a>
                             </div>
                         </div>
                         <div class="member-form">                                   
@@ -56,6 +64,9 @@
                                 <div class="form-group">
                                     <input type="password" v-model="registerForm.password_confirmation" name="password_confirmation" placeholder="CONFIRM PASS" required>
                                 </div>   
+                                <div class="form-group" style="flex-basis: 100%;">
+                                    <input type="text" v-model="registerForm.invite_code" style="text-align: center;" name="invite_code" placeholder="INVITE CODE" value="" required>
+                                </div>
                             </div>
                             <a href="#" class="fb-login"><span class="fb-login-text"><img src="img/fb.png" alt="">login with facebook</span></a>
                         </div>

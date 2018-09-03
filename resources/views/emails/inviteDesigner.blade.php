@@ -1,1 +1,1 @@
-You are invited as a designer, your code is :  {{ $user->invite_code }}
+You are invited to Badge-m.com, your code is :  {{ $code }}

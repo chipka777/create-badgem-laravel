@@ -5,54 +5,74 @@
         <main-page inline-template >
             <div>
                 <div class="main-navigation-wrap" v-if="showAllMenu">
+				<img class="hidden" src="upload/thumbs/logo-phase2.gif" >
+				<img class="hidden" src="upload/team/thumbs/logo-phase2.gif" >
+                <input hidden class="user-invites" value="{{ Auth::user()->settings !== null && Auth::user()->settings->invites !== null ? Auth::user()->settings->invites : 0}}">
+                <span class="hidden avatar-src">{{ Auth::user()->settings !== null && Auth::user()->settings->avatar !== null ? Auth::user()->settings->avatar : 'logo-phase2.png' }} </span>
                     <div class="main-menu-layer1">
                         <div class="home-menu animated" @click="homeLoad"></div>                       
                         <div class="insta-menu animated" @click="instagramLoad"></div>
                         <div class="rocket-menu animated" @click="productsLoad('all', 50, false)"></div>                                                                     
                     </div>
+                    <el-dialog
+                        title="Send Invite"
+                        :visible.sync="inviteSend"
+                        width="30%">
+                            <span>Recipient`s Email</span>
+                            <el-input v-model="recEmail"></el-input>
+
+                        <span slot="footer" class="dialog-footer">
+                            <el-button @click="inviteSend = false">Cancel</el-button>
+                            <el-button type="primary" @click="sendInvite">Send</el-button>
+                        </span>
+                    </el-dialog>
+                    <el-dialog
+                        :visible.sync="avatarView"
+                        width="30%"
+                        class="avatar-view">
+                        <img class="avatar-view-preview" style="width: auto;height: auto;" :src="'upload/avatars/' + avatarPreview" />
+                    </el-dialog>
                     <div class="main main-navigation-2"  v-loading="loading">
-                        <div class="row main-navigation-header" v-if="showMenu">
-                            <div class="col-md-9 welcome-text">
+                        <div class="main-navigation-header" v-if="showMenu">
+                            <div class="welcome-text">
                                 Hello, {{ Auth::user()->name }}!
                             </div>
-                            <div class="col-md-3 pull-right message ">
-                                <img class="col-md-6 message-image animated" src="{{ asset('img/msg-phase2.png') }}" />
-                                <span class="message-text col-md-6">
-                                    (3)
-                                </span>
+                            <div class="message">
+                                <a href="{{ route('get-logout') }}">
+                                    <span class="message-text">
+                                        Logout
+                                    </span>
+                                </a>
                             </div>
                         </div>    
-                        <div class="row main-navigation-body" v-if="showMenu">
-                            <div class="row" >
-                                <div class="col-md-6 bulletin" @click="bulletinLoad('bulletins' , 50)">
-                                    <img class="col-md-4 bulletin-image animated" src="{{ asset('img/bulletin-phase2.png') }}" />
-                                    <span class="bulletin-text col-md-6">
-                                        Bulletin
-                                    </span>
-                                </div>
-                                <div class="col-md-6 creations  pull-right" @click="imageLoad('creations', 50, false)">
-                                    <img class="col-md-4 creations-image animated" src="{{ asset('img/creations-phase2.png') }}" />
-                                    <span class="creations-text col-md-6">
-                                        Creations
-                                    </span>
-                                </div>
+                        <div class="main-navigation-body" v-if="showMenu">
+                            <!--<div class="bulletin" @click="bulletinLoad('bulletins' , 50)">-->
+                            <div class="bulletin" @click="settingsOpen">
+                                <img class="bulletin-image animated" src="{{ asset('img/bulletin-phase2.png') }}" />
+                                <span class="bulletin-text">
+                                    Settings
+                                </span>
                             </div>
-                            <div class="row" >
-                                <div class="col-md-6 favorites" @click="imageLoad('favorites', 50)">
-                                    <img class="col-md-4 favorites-image animated" src="{{ asset('img/favorites-phase2.png') }}" />
-                                    <span class="favorites-text col-md-6">
-                                        Favorites
-                                    </span>
-                                </div>
-                                <div class="col-md-6 history" @click="imageLoad('histories', 50)">
-                                    <img class="col-md-4 history-image animated" src="{{ asset('img/history-phase2.png') }}" />
-                                    <span class="history-text col-md-6">
-                                        History
-                                    </span>
-                                </div>
+                            <div class="creations" @click="imageLoad('creations', 50, false)">
+                                <img class="creations-image animated" src="{{ asset('img/creations-phase2.png') }}" />
+                                <span class="creations-text">
+                                    Creations
+                                </span>
+                            </div>
+                            <div class="favorites" @click="imageLoad('favorites', 50)">
+                                <img class="favorites-image animated" src="{{ asset('img/favorites-phase2.png') }}" />
+                                <span class="favorites-text">
+                                    Favorites
+                                </span>
+                            </div>
+                            <div class="history" @click="imageLoad('histories', 50)">
+                                <img class="history-image animated" src="{{ asset('img/history-phase2.png') }}" />
+                                <span class="history-text">
+                                    History
+                                </span>
                             </div>
                         </div>
-                        <div class="row creations-section" v-if="currentType == 'creations' && showMenu == false">
+                        <div class="creations-section" v-if="currentType == 'creations' && showMenu == false">
                             <span class="title">Upload new Badges</span>
                             <div class="progress" id="upload-progress" style="display:none">
                                 <div class="progress-bar progress-bar-primary progress-bar-striped active" role="progressbar"
@@ -100,28 +120,131 @@
                                         :label="item.name"
                                         :value="item.id">
                                         </el-option>
-                                    </el-select>
+                            </el-select>
                             <button type="button" class=" creations-upload-btn  btn btn-labeled btn-primary" @click="uploadCreations(0)" >
                                     <span class="btn-label"><i class="glyphicon glyphicon-upload"></i></span>
                                     Upload
                                 </button>
                             </div>
                         </div>
-                        <div class="row store-section" v-if="currentSection == 'products'" style="text-align: center">
-                            <div class="col-md-6 font-size50" @click="productsLoad('cap', 50, false)">
+                        <div class="settings-section" v-if="currentSection === 'settings'">
+                            <div class="settings-body row">
+                                <div>                                
+                                    <div class="settings-header">
+                                        
+                                        <div>
+                                            <span class="settings-username js-s-username" v-show="!nameEdit">
+                                                {{ Auth::user()->name }}
+                                            </span>
+                                            <input type="text" class="js-name" value="{{ Auth::user()->name }}" v-show="nameEdit" max="255" style="border: none;font-size: 24px;background: transparent;text-align: center;"/>
+                                            <i class="fa fa-pencil" aria-hidden="true" @click="editName" v-if="!nameEdit"></i>       
+                                            <i class="fa fa-check-circle-o" aria-hidden="true" @click="saveName" v-else ></i>                                                                       
+                                        </div>                    
+                                    </div>
+                                    <div class="col-md-4">
+                                        <div class="col-md-12 h-75">
+                                            <span class="s-title">Date Joined:</span> 
+                                            <span class="s-info">{{ Auth::user()->created_at->format('M d, Y') }}</span> 
+                                        </div>
+                                        <div class="col-md-12 h-75">
+                                            <span class="s-title">Invited by:</span> 
+                                            <span class="s-info">{{ Auth::user()->settings !== null && Auth::user()->settings->getInvited() ? Auth::user()->settings->getInvited()->name : 'registered'}}</span> 
+                                        </div>
+                                    </div>
+                                    <div class="col-md-4">
+                                        <div style="width: fit-content;position:relative">
+                                            <div class="settings-mask">
+                                                <button class="btn btn-default" @click="avatarView = true" style="display: block;margin-bottom: 3%;width:  100%;">View</button>
+                                                <button class="btn btn-default" style="display:block;width:  100%;position: relative; overflow: hidden;">
+                                                    <span class="pointer"> Change</span>
+                                                    <input type="file" class="avatar-input" @change="avatarChange" />
+                                                </button>                                        
+                                            </div>
+                                            <img class="avatar-preview" :src="'upload/avatars/' + avatarPreview" />
+                                        </div>
+                                    </div>
+                                    <div class="col-md-4">
+                                        <div class="col-md-12 h-75">
+                                            <span class="s-title">LDV BALANCE:</span> 
+                                            <span class="s-info">0</span> 
+                                        </div>
+                                        <div class="col-md-12 h-75">
+                                            <span class="s-title">LDV EARNED:</span> 
+                                            <span class="s-info">0</span> 
+                                        </div>
+                                        <div class="col-md-12 h-75">
+                                            <span class="s-title">INVITES:</span> 
+                                            <span class="s-info invites">@{{ userInvites }}</span> 
+                                            <div class="d-block w-100 s-info mt-1">
+                                                <a @click="inviteSend = true">SEND INVITE</a>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="col-md-12 text-center">
+                                        <div class="">
+                                            <span class="s-title">Rank:</span> 
+                                            <span class="s-info">{{ Auth::user()->settings !== null && Auth::user()->settings->rank_level !== null ? Auth::user()->settings->rank_level : 'Beginner'}}</span> 
+                                        </div>
+                                    </div>
+
+                                    <!--<div class="col-md-6">
+                                        @php 
+                                            $birth = Auth::user()->settings !== null ? Auth::user()->settings->age : null;
+                                            if ($birth !== null) {
+                                                $birth = Carbon\Carbon::createFromFormat('m-d-Y', $birth);
+                                            }
+                                            $day = $birth !== null ? $birth->format('d') : 1;
+                                            $month = $birth !== null ? $birth->format('M') : 'Jan';
+                                            $year = $birth !== null ? $birth->format('Y') : '1950';                                        
+                                        @endphp
+                                        <span class="s-title">Age:</span> 
+                                        <span class="s-info js-age" v-show="!ageEdit">{{ $birth !== null ? $birth->age : '...'}}</span> 
+                                        <span class="s-edit" v-show="ageEdit">
+                                            <select class="form-control js-age-day">
+                                                @for($d=1; $d <= 31; $d++)
+                                                    <option value="{{ $d }}" {{ $day == $d ? 'selected' : '' }}>{{ $d }}</option>
+                                                @endfor
+                                            </select>
+                                            <select class="form-control js-age-month" >
+                                                @for($m=1; $m <= 12; $m++)
+                                                    <option value="{{ $m }}" {{ $month == date('M', mktime(0,0,0,$m, 1, date('Y'))) ? 'selected' : '' }}>{{ date('M', mktime(0,0,0,$m, 1, date('Y'))) }}</option>
+                                                @endfor
+                                            </select>
+                                            <select class="form-control js-age-year" >
+                                                @for($y=1950; $y <= 2018; $y++)
+                                                    <option value="{{ $y }}" {{ $year == $y ? 'selected' : '' }}>{{ $y }}</option>
+                                                @endfor
+                                            </select>
+                                        </span>
+                                        <i class="fa fa-pencil" aria-hidden="true" @click="editAge" v-if="!ageEdit"></i>
+                                        <i class="fa fa-check-circle-o" aria-hidden="true" @click="saveAge" v-else style="position: absolute;margin-top: 3%;margin-left: 1%;"></i>                                    
+                                    </div>
+                                    
+                                    
+                                    
+                                    <div class="col-md-12">
+                                        <span class="s-title">BIO:</span> 
+                                        <span class="s-info js-s-bio">{{ Auth::user()->settings !== null && Auth::user()->settings->bio !== null ? str_limit(Auth::user()->settings->bio, 100, '...') : '...'}}</span> 
+                                        <i class="fa fa-pencil" aria-hidden="true" @click="editBio"></i>
+                                    </div>-->
+                                </div>
+                            </div>
+                        </div>
+                        <div class="store-section" v-if="currentSection == 'products'" style="text-align: center">
+                            <div class="store-category" @click="productsLoad('cap', 50, false)">
                                 Caps
                             </div>
-                            <div class="col-md-6 font-size50" @click="productsLoad('t-shirt', 50, false)">
+                            <div class="store-category" @click="productsLoad('t-shirt', 50, false)">
                                 T-shirts
                             </div>
-                            <div class="col-md-6 font-size50" @click="productsLoad('badge', 50, false)">
+                            <div class="store-category" @click="productsLoad('badge', 50, false)">
                                 Badges
                             </div>
-                            <div class="col-md-6 font-size50" @click="productsLoad('book', 50, false)">
+                            <div class="store-category" @click="productsLoad('book', 50, false)">
                                 Books
                             </div>
                         </div>
-                        <div class="row category-section" v-if="additionalCurrentType == 'category' && showMenu == false">
+                        <div class="category-section" v-if="additionalCurrentType == 'category' && showMenu == false">
                             <span class="title">Category Search</span>
                             <div class="select-box">
                                 <select id="select-cat" class="category-selecter" name="searchCate" @change="getImages($event.target.value, 50, false, 'category')">
@@ -130,39 +253,39 @@
                                 </select>
                             </div>
                         </div>
-                        <div class="row faq-section" v-if="additionalCurrentType == 'aboutUs' && showMenu == false">
-                            <div class="row faq-description col-md-12">
-                                <div class="col-md-12" v-if="currentType === 'faq'">
+                        <div class="faq-section" v-if="additionalCurrentType == 'aboutUs' && showMenu == false">
+                            <div class="faq-description">
+                                <div v-if="currentType === 'faq'">
                                     Freely scroll through the frequently asked questions on our carousel.
                                 </div>
-                                <div class="col-md-12" v-if="currentType === 'location'">
+                                <div v-if="currentType === 'location'">
                                     Address 12437 Lewis Street Suite 100, Garden Grove CA 92840
                                 </div>
-                                <div class="col-md-12" v-if="currentType === 'goals'">
+                                <div v-if="currentType === 'goals'">
                                 </div>
-                                <div class="col-md-12" v-if="currentType === 'team'">
-                                    Our best team
+                                <div v-if="currentType === 'team'">
+                                    <span class="title">Our best team</span>
+                                    <div class="select-box">
+                                        <select id="team-cat" class="category-selecter" name="searchCate" @change="bulletinLoad('team', 50, false, 'aboutUs', '/' + $event.target.value)">
+                                            <option value="0">All</option>
+                                            @foreach(App\Team::TYPES as $type => $value)
+                                                <option value="{{ $value }}">{{ $type }}</option>        
+                                            @endforeach                     
+                                        </select>
+                                    </div>
                                 </div>
                             </div>
-                            <div class="row faq-menu">
-                                <div class="col-md-12 faq-item">
-                                    <div class="col-md-4">
-                                        <a @click="bulletinLoad('team', 50, false, 'aboutUs')"> Team </a>
-                                    </div>
-                                    <div class="col-md-4">
-                                        <a @click="openLocationCloud"> Location</a>
-                                    </div>
-                                    <div class="col-md-4">
-                                        <a @click="bulletinLoad('goals', 50, false, 'aboutUs')"> Goals</a>
-                                    </div>
-                                </div>
+                            <div class="faq-menu">
+                                <a @click="bulletinLoad('team', 50, false, 'aboutUs')"> Team </a>
+                                <a @click="openLocationCloud"> Location</a>
+                                <a @click="bulletinLoad('goals', 50, false, 'aboutUs')"> Goals</a>
                             </div>                            
                         </div>
-						<div class="row main-menu-layer3">
-							<div class="left-many animated" @click="spiralManyLeft"></div>
-							<div class="left-single animated" @click="spiralLeft"></div>
-							<div class="right-single animated" @click="spiralRight"></div>
-							<div class="right-many animated" @click="spiralManyRight"></div>  
+						<div class="main-menu-layer3" v-if="arrowEnable">
+							<div class="left-many animated" @click="spiralManyLeft"><img src="{{ asset('img/left-many-arrow.png') }}"></div>
+							<div class="left-single animated" @click="spiralLeft"><img src="{{ asset('img/left-arrow.png') }}"></div>
+							<div class="right-single animated" @click="spiralRight"><img src="{{ asset('img/right-arrow.png') }}"></div>
+							<div class="right-many animated" @click="spiralManyRight"><img src="{{ asset('img/right-many-arrow.png') }}"></div>  
 						</div>
                         <div class="drop-me">
                             <p>Drop me Here</p>
@@ -203,7 +326,7 @@
                     <template v-if="currentSection === 'images'">
                         <div :id='"img-"+image.id' :class='"panel pos"+image.num+" canva-img"' v-for='(image, key) in images' :data-pos="image.num" >
                             <div class="image-wrap" @mouseenter="showToolTip($event, key)" @mouseleave="hideToolTip($event, key)" :data-pos="image.num">
-                                <img onmousedown='panelImg(event, $(this))' :src='"upload/thumbs/" + image.name'  :data-pos="image.num" :data-id="image.id"  />
+                                <img :class="'js-image-badge ' + image.className" onmousedown='panelImg(event, $(this))' :src='"upload/thumbs/" + image.name'  :data-pos="image.num" :data-id="image.id"  />
                                 <el-tooltip class="item" effect="dark" content="Remove from favorites" v-if="image.favorite" placement="top">
                                     <i class="fa fa-heart favorite-heart"  @click="removeFromFavorited(image.id, key)"></i>    
                                 </el-tooltip>

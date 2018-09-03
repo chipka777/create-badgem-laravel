@@ -10,8 +10,12 @@
 | contains the "web" middleware group. Now create something great!
 |
 */
-
+Route::get('logout', 'Auth\LoginController@logout')->name('get-logout');
 Auth::routes();
+Route::get('login/{provider}', 'Auth\SocialLoginController@redirectToProvider');
+Route::get('login/{provider}/callback', 'Auth\SocialLoginController@handleProviderCallback');
+
+Route::get('cryptopayment/callback', 'Payments\PaymentController@handleCallback');
 
 Route::post('/activate', 'Auth\\RegisterController@activate');
 
@@ -99,6 +103,7 @@ Route::group(['namespace' => 'API', 'prefix' => 'api/v1'], function() {
         Route::get('bulletins/{count}/{offset}', 'BulletinController@getBulletins');
         Route::get('creations/{count}/{offset}', 'ImagesController@getCreations');
         Route::get('favorites/{count}/{offset}', 'ImagesController@getFavorites');
+        Route::get('team/{cat}/{count}/{offset}', 'TeamController@getTeamMembersByCategory');                        
         Route::get('team/{count}/{offset}', 'TeamController@getTeamMembers');        
         Route::get('goals/{count}/{offset}', 'GoalsController@getGoals');                
         Route::get('histories/{count}/{offset}', 'HistoryController@getHistoryByCount');                
@@ -111,6 +116,12 @@ Route::group(['namespace' => 'API', 'prefix' => 'api/v1'], function() {
 
         Route::get('videos/{count}/{offset}', 'VideoController@getByCount');
         
+        Route::post('settings/age', 'SettingsController@changeAge');
+        Route::post('settings/name', 'SettingsController@changeName');
+        Route::post('settings/bio', 'SettingsController@changeBio');   
+        Route::post('settings/avatar', 'SettingsController@changeAvatar');     
+
+        Route::post('invite/send', 'InviteController@sendInvite');                     
     });
 });
 
