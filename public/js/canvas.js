@@ -400,6 +400,15 @@ function hideLatest() {
     }
 }
 
+function canvasReset() {
+    $('.canvas').children().remove();
+
+    $('#canvas-scale').css('top', '77.4568%');
+
+    latest = false;
+    target = true;
+}
+
 function savePDF() {
     html = '';
     images = [];

@@ -103,6 +103,9 @@
 											<li><a href="{{ route('images.create') }}" class="">Add new images</a></li>
 											<li><a href="{{ route('images.index') }}" class="">Edit existing images</a></li>
 										@endpermission
+										@role('administrator')
+											<li><a href="{{ route('images.pending') }}" class="">Pending images</a></li>
+										@endrole
 										</ul>
 									</div>
 								</li>

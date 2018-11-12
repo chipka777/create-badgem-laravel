@@ -609,15 +609,14 @@ width: 28%;
 }
 .canvas-btn-home {
 	z-index: 83;
-    background: url(../img/canvas-main.png);
+    background: url(../img/console/home.png);
     background-size: contain;
     background-repeat: no-repeat;
     position: relative;
-    top: 0%;
-    left: -12%;
-    width: 126%;
-    height: 42%;
-    margin: -1%;
+    top: 8%;
+    left: 21%;
+    width: 91%;
+    height: 21%;
     padding: 0px;
     /* border-radius: 50px; */
     text-align: center;
@@ -625,14 +624,14 @@ width: 28%;
 }
 .canvas-btn-scale {
 	z-index: 83;
-    background: url(../img/canvas-print-x.png);
+    background: url(../img/console/download.png);
     background-size: contain;
     background-repeat: no-repeat;
     position: relative;
-    top: -5%;
-    left: 0;
+    top: 18%;
+    left: 20.4%;
     width: 100%;
-    height: 44%;
+    height: 24%;
     margin: -1%;
     padding: 0px;
     /* border-radius: 50px; */
@@ -641,28 +640,32 @@ width: 28%;
 }
 
 .canvas-btn-print {
-    z-index: 83;
-    background: url(../img/canvas-print.png);
+	z-index: 83;
+    background: url(../img/console/reset.png);
     background-size: contain;
     background-repeat: no-repeat;
     position: relative;
-    top: -2.5%;
-    left: 0;
+    top: 26.5%;
+    left: 20%;
     width: 100%;
-    height: 30%;
+    height: 22%;
     margin: -1%;
     padding: 0px;
     /* border-radius: 50px; */
     text-align: center;
-    transition: left ease-out 0.5s;
+    transition: top ease-out 0.5s;
 }
 
-.canvas-btn-home:hover,.canvas-btn-print:hover{
-	top: -3%;
+.canvas-btn-home:hover{
+	top: 6%;
 }
 
 .canvas-btn-scale:hover {
-	top: -8%;
+	top: 16%;
+}
+
+.canvas-btn-print:hover {
+	top: 24.5%;
 }
 .top-btn {
 	margin-top: 11px !important;

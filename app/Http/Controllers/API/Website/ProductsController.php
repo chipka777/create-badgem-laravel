@@ -11,6 +11,7 @@ class ProductsController extends Controller
     public function getAllByCount($count, $offset)
     {
         $products = Product::offset($offset)
+            ->orderBy('created_at', 'desc')
             ->limit($count)
             ->get()
             ->map(function ($product, $key) {
@@ -30,6 +31,7 @@ class ProductsController extends Controller
     public function getProductsByTypeAndCount($type, $count, $offset) 
     {
         $products = Product::where('type', $type)
+            ->orderBy('created_at', 'desc')
             ->offset($offset)
             ->limit($count)
             ->get()

@@ -25,3 +25,5 @@ Route::group(['namespace' => 'API', 'prefix' => 'v1'], function() {
     
 });
 
+Route::get('cryptopayment/callback', 'Payments\PaymentController@handleCallbackGet');
+Route::post('cryptopayment/callback', 'Payments\PaymentController@handleCallbackPost');

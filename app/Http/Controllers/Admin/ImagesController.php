@@ -58,10 +58,10 @@ class ImagesController extends Controller
             }
         }*/
 
-        if (Auth::user()->hasRole('designer') || Auth::user()->hasRole('administrator')) {
+        //if (Auth::user()->hasRole('designer') || Auth::user()->hasRole('administrator')) {
             $validator = Validator::make($request->all(), [
                 'image' => 'required|mimes:jpeg,bmp,png,svg,jpg,gif|max:3000',
-            ]);
+            ]);d
     
             if ($validator->fails()) {
                 return response()->json($validator->errors()->first(), 415);
@@ -111,9 +111,9 @@ class ImagesController extends Controller
             }
     
             return response()->json("$original_name : Invalid image type. Acceptable: png, jpeg, svg, gif.", 415);
-        } else {
+        /*} else {
             return response()->json("You do not have the permissions to add badges", 401);
-        }
+        }*/
         
 
     }

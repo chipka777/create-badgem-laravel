@@ -178,7 +178,7 @@ return [
         App\Providers\RouteServiceProvider::class,
         Laratrust\LaratrustServiceProvider::class,
         Laravel\Socialite\SocialiteServiceProvider::class,
-
+        Ixudra\Curl\CurlServiceProvider::class,
     ],
 
     /*
@@ -229,7 +229,7 @@ return [
         'Validator' => Illuminate\Support\Facades\Validator::class,
         'View' => Illuminate\Support\Facades\View::class,
         'Laratrust'   => Laratrust\LaratrustFacade::class,
-
+        'Curl'          => Ixudra\Curl\Facades\Curl::class,
     ],
 
 ];

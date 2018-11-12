@@ -17,7 +17,7 @@ class FavoritedImages extends Model
                             return $item->image_id;
                         });
 
-        $images = Image::whereIn('id', $favorites);
+        $images = Image::whereIn('id', $favorites)->where('approved', 1);
         return $images;
     }
 

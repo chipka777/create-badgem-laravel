@@ -134,6 +134,27 @@ class UsersController extends Controller
         return json_encode(['status' => 'error', 'message' => 'The invitation was not sent, the problem with database']);                
     }
 
-    
+    public function delete(Request $request)
+    {
+        $user = User::find($request->id);
+
+        $name = $user->name;
+
+        $user->meta()->delete();
+        $user->settings()->delete(); 
+        $user->category()->delete();
+        $user->notifications()->delete();
+        $user->histories()->delete();
+        $user->images->each(function ($image) {
+            FavoritedImages::where('image_id', $image->id)->delete();
+        });
+        $user->images()->delete();
+        $user->favoriteImages()->delete();
+        $user->imagesHistory()->delete();
+        $user->delete();
+
+        return json_encode(['status' => 'success', 'message' => "User $name has been deleted successfully"]);                
+               
+    }
 }
 

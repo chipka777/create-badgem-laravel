@@ -1,18 +1,27 @@
 @extends('layouts.app')
 
 @section('content')
-    <div id="app" v-cloak>
-        <main-page inline-template >
+    <div id="app" v-cloak style="display:none">
+        <main-page inline-template   :from="'{{ session()->get('from') }}'" >
             <div>
                 <div class="main-navigation-wrap" v-if="showAllMenu">
 				<img class="hidden" src="upload/thumbs/logo-phase2.gif" >
 				<img class="hidden" src="upload/team/thumbs/logo-phase2.gif" >
                 <input hidden class="user-invites" value="{{ Auth::user()->settings !== null && Auth::user()->settings->invites !== null ? Auth::user()->settings->invites : 0}}">
-                <span class="hidden avatar-src">{{ Auth::user()->settings !== null && Auth::user()->settings->avatar !== null ? Auth::user()->settings->avatar : 'logo-phase2.png' }} </span>
+                <span class="hidden avatar-src">{{ Auth::user()->settings !== null && Auth::user()->settings->avatar !== null ? (filter_var(Auth::user()->settings->avatar, FILTER_VALIDATE_URL) ? Auth::user()->settings->avatar : 'upload/avatars/' . Auth::user()->settings->avatar) : 'upload/avatars/logo-phase2.png' }} </span>
                     <div class="main-menu-layer1">
-                        <div class="home-menu animated" @click="homeLoad"></div>                       
-                        <div class="insta-menu animated" @click="instagramLoad"></div>
-                        <div class="rocket-menu animated" @click="productsLoad('all', 50, false)"></div>                                                                     
+                        <div class="home-menu animated" @click="homeLoad" @mouseenter="openPopup('home-popup')" @mouseleave="closePopup('home-popup')"></div>   
+                        <div class="leftSideBarPopUp home-popup">
+                            Home
+                        </div>                    
+                        <div class="insta-menu animated" @click="instagramLoad(false)" @mouseenter="openPopup('insta-popup')" @mouseleave="closePopup('insta-popup')"></div>
+                        <div class="leftSideBarPopUp insta-popup">
+                            Social
+                        </div>
+                        <div class="rocket-menu animated" @click="productsLoad('all', 50, false)" @mouseenter="openPopup('rocket-popup')" @mouseleave="closePopup('rocket-popup')"></div>    
+                        <div class="leftSideBarPopUp rocket-popup">
+                            Shop
+                        </div>                                                                 
                     </div>
                     <el-dialog
                         title="Send Invite"
@@ -30,10 +39,10 @@
                         :visible.sync="avatarView"
                         width="30%"
                         class="avatar-view">
-                        <img class="avatar-view-preview" style="width: auto;height: auto;" :src="'upload/avatars/' + avatarPreview" />
+                        <img class="avatar-view-preview" style="width: auto;height: auto;" :src="avatarPreview" />
                     </el-dialog>
                     <div class="main main-navigation-2"  v-loading="loading">
-                        <div class="main-navigation-header" v-if="showMenu">
+                        <div class="main-navigation-header" v-if="showMenu || currentSection === 'social'">
                             <div class="welcome-text">
                                 Hello, {{ Auth::user()->name }}!
                             </div>
@@ -70,6 +79,43 @@
                                 <span class="history-text">
                                     History
                                 </span>
+                            </div>
+                        </div>
+                        <div class="main-navigation-body" v-if="currentSection === 'social' && currentType !== 'buy'" style="font-size: 30px; padding: 3%;">
+                            <!--<div class="bulletin" @click="bulletinLoad('bulletins' , 50)">-->
+                            <div class="bulletin" @click="instagramLoad(false)">
+                                <span class="bulletin-text">
+                                    Instagram
+                                </span>
+                            </div>
+                            <div class="creations" @click="imageLoad('videos', 50, false, '', 'social')">
+                                <span class="creations-text">
+                                    Youtube                                
+                                </span>
+                            </div>
+                            <div class="favorites" @click="alert('telegram')">
+                                <span class="favorites-text">
+                                    Telegram                                
+                                </span>
+                            </div>
+                        </div>
+                        <div class="ldv-section" v-if="currentType == 'ldvHistory'">
+                            <div class="ldv-info">
+                                <div class="ldv-bal">LDV BALANCE: 345</div>
+                                <div class="ldv-ear">LDV EARNED: 3000</div>
+                            </div>
+                            <div class="other-crypto">
+                                <div class="crypto-grid">
+                                    <div>
+                                        LDV: 500</span>  
+                                    </div>
+                                    <div>
+                                        BTC: @{{ btcValue }}</span>  
+                                    </div>
+                                    <div>
+                                        ETH: @{{ ethValue }}</span>  
+                                    </div>
+                                </div>
                             </div>
                         </div>
                         <div class="creations-section" v-if="currentType == 'creations' && showMenu == false">
@@ -127,7 +173,23 @@
                                 </button>
                             </div>
                         </div>
-                        <div class="settings-section" v-if="currentSection === 'settings'">
+                        <div class="text-center" v-if="currentType === 'buy'">
+                            <form @submit="setTransactionFields" id="transactionForm" method="POST" action="http://payment.badge-m.com/payment">
+                                {{ csrf_field() }}
+                                @php
+                                    $orderId = str_random(5);
+                                @endphp
+                                <span style="font-size: 20px;">Please enter your ETH address</span>
+                                <el-input style="margin-top: 25px;" placeholder="ETH address" v-model="ethAddress" name="eth_address"></el-input>
+								<input hidden name="amount" value="" />
+								<input hidden name="array_of_images" value="" /> 
+								<input hidden name="order_id" value="{{ $orderId }}" />                                                                                               
+								<input hidden name="description" value="Order ID: {{ $orderId }}" />
+                                <button type="submit" class="el-button el-button--primary is-plain" style="margin-top: 25px;"><span>Buy</span></button>
+                        
+                            </form>
+                        </div>
+                        <div class="settings-section" v-if="currentSection === 'settings' && currentType !== 'buy'">
                             <div class="settings-body row">
                                 <div>                                
                                     <div class="settings-header">
@@ -151,7 +213,7 @@
                                             <span class="s-info">{{ Auth::user()->settings !== null && Auth::user()->settings->getInvited() ? Auth::user()->settings->getInvited()->name : 'registered'}}</span> 
                                         </div>
                                     </div>
-                                    <div class="col-md-4">
+                                    <div class="col-md-4" style="justify-content: center;align-items: center;display: flex;">
                                         <div style="width: fit-content;position:relative">
                                             <div class="settings-mask">
                                                 <button class="btn btn-default" @click="avatarView = true" style="display: block;margin-bottom: 3%;width:  100%;">View</button>
@@ -160,7 +222,7 @@
                                                     <input type="file" class="avatar-input" @change="avatarChange" />
                                                 </button>                                        
                                             </div>
-                                            <img class="avatar-preview" :src="'upload/avatars/' + avatarPreview" />
+                                            <img class="avatar-preview" :src="avatarPreview" />
                                         </div>
                                     </div>
                                     <div class="col-md-4">
@@ -230,7 +292,7 @@
                                 </div>
                             </div>
                         </div>
-                        <div class="store-section" v-if="currentSection == 'products'" style="text-align: center">
+                        <div class="store-section" v-if="currentSection == 'products' && currentType !== 'buy'" style="text-align: center">
                             <div class="store-category" @click="productsLoad('cap', 50, false)">
                                 Caps
                             </div>
@@ -253,7 +315,7 @@
                                 </select>
                             </div>
                         </div>
-                        <div class="faq-section" v-if="additionalCurrentType == 'aboutUs' && showMenu == false">
+                        <div class="faq-section" v-if="additionalCurrentType == 'aboutUs' && showMenu == false && currentType !== 'buy'">
                             <div class="faq-description">
                                 <div v-if="currentType === 'faq'">
                                     Freely scroll through the frequently asked questions on our carousel.
@@ -292,9 +354,18 @@
                         </div>
                     </div>
                     <div class="main-menu-layer2">
-                        <div class="diamond-menu animated" @click="imageLoad('videos', 50, true, '', 'videos')"></div>
-                        <div class="paint-menu animated" @click="getImages('all', 50, false, 'category')"></div>       
-                        <div class="zoom-menu animated" @click="bulletinLoad('faq', 50, false, 'aboutUs')"></div>                                                                 
+                        <div class="diamond-menu animated" @click="openLDV" @mouseenter="openPopup('diamond-popup')" @mouseleave="closePopup('diamond-popup')"></div>
+                        <div class="rightSideBarPopUp diamond-popup">
+                            LDV
+                        </div>
+                        <div class="paint-menu animated" @click="getImages('all', 50, false, 'category')" @mouseenter="openPopup('paint-popup')" @mouseleave="closePopup('paint-popup')"></div>     
+                        <div class="rightSideBarPopUp paint-popup">
+                            Categories
+                        </div>  
+                        <div class="zoom-menu animated" @click="bulletinLoad('faq', 50, false, 'aboutUs')" @mouseenter="openPopup('zoom-popup')" @mouseleave="closePopup('zoom-popup')"></div>     
+                        <div class="rightSideBarPopUp zoom-popup">
+                            About Us
+                        </div>                                                            
                     </div>
                 </div>
                 <div class="main-canvas">
@@ -320,6 +391,7 @@
                     <div class="canvas-btn">
                         <div class="canvas-btn-home" onclick="canvasHide()" ></div>
                         <div class="canvas-btn-scale" @click="savePNG"></div>
+                        <div class="canvas-btn-print" onclick="canvasReset()"></div>                        
                     </div>
                 </div>
                 <div class="panels">
@@ -336,7 +408,7 @@
                             </div>   
                         </div>
                     </template>
-                    <template v-if="currentSection === 'videos'">
+                    <template v-if="currentSection === 'videos' || currentSection === 'social'">
                         <div :id='"img-"+video.id' :class='"panel pos"+video.num+" canva-img video-block"' v-for='(video, key) in images' :data-pos="video.num" >
                             <div class="image-wrap" :data-pos="video.num">
                                 <img :src='video.thumbnail' @click="openVideo(video.video_id)" class="video-thumb"  :data-pos="video.num" :data-id="video.id"  />      
@@ -344,11 +416,10 @@
                             </div>   
                         </div>
                     </template>
-                    <template v-if="currentSection === 'instagram'">
+                    <template v-if="currentType === 'instagram' && currentSection === 'social'">
                         <div :id='"img-"+image.id' :class='"panel pos"+image.num+" canva-img"' v-for='(image, key) in images' :data-pos="image.num" >
                             <div class="image-wrap"  :data-pos="image.num">
-                                <img class="insta-img" onmousedown='panelImg(event, $(this))' :src='image.name'  :data-pos="image.num" :data-id="image.id" />
-                                                           
+                                <img class="insta-img"  :src='image.name'  :data-pos="image.num" @click="openInstaModal(image.id, key)" :data-id="image.id" />
                             </div>   
                         </div>
                     </template>
@@ -360,8 +431,9 @@
                         </div>
                     </template>
                     <template v-if="currentSection === 'bulletins'">
-                        <div :id='"bulletin-"+key' :class='"panel pos"+bulletin.num+" cloud-img"' v-for='(bulletin, key) in bulletins' :data-pos="bulletin.num"  :data-id="key" @click="openCloud(key)">
+                        <div :id='"bulletin-"+key' :class='"panel bulletin-cloud pos"+bulletin.num+" cloud-img"' v-for='(bulletin, key) in bulletins' :data-pos="bulletin.num"  :data-id="key" @click="openCloud(key)">
                             <span>@{{ bulletin.data }}</span>
+                            <span v-if="bulletin.add_info" :class="'b-add-info ' + bulletin.class">@{{ bulletin.extra }}</span>
                         </div>
                     </template>
                     <template v-if="currentSection === 'team'">
@@ -436,6 +508,41 @@
                         </div>
                     </div>
                 </div>
+                <div id="insta-modal" class="wrap-cloud">
+                    <div class="open-insta-cloud" v-loading="loading">    
+                        <div class="insta-header"> 
+                            <el-carousel trigger="click" style="max-height: 350px;overflow:hidden;" indicator-position="none" arrow="always" :autoplay="false" >
+                                <el-carousel-item v-for="(item, key) in currentInstaImage.carousel" :key="key" v-if="currentInstaImage.carousel">
+                                    <img style="max-height: 350px;display: block;" :src="item.images.standard_resolution.url" />                                    
+                                </el-carousel-item>
+                                <el-carousel-item v-if="!currentInstaImage.carousel">
+                                    <img style="max-height: 350px;display: block;" :src="currentInstaImage.img" />                                    
+                                </el-carousel-item>
+                            </el-carousel>
+                        </div>
+                        <div class="insta-desc">
+                            @{{ currentInstaImage.caption != undefined ? currentInstaImage.caption.text != 'undefined' ? currentInstaImage.caption.text : '' : '' }}
+                        </div>
+                        <div class="insta-comments row">
+                            <div class="insta-comment col-md-12" v-for="comment in currentInstaImage.comments">
+                                <div class="comment-wrapper">
+                                    <div class="user-info row">
+                                        <div class="user-avatar col-md-3">
+                                            <img src="/upload/avatars/logo-phase2.png" />
+                                        </div>
+                                        <div class="user-name col-md-9">
+                                            <h2 class="name">@{{ comment.from.username }}</h2>
+                                            <p class="comment-text">@{{ comment.text }}</p>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="insta-cloud-close" @click="closeInstaCloud">
+                            X
+                        </div>
+                    </div>
+                </div>
                 <div id="team-cloud" class="wrap-cloud" >
                     <div class="open-cloud" >
                         <div class="team-cloud-header">
@@ -451,20 +558,18 @@
                         </div>
                     </div>
                 </div>
-                <div id="product-cloud" class="wrap-cloud" >
+                <div id="product-cloud" class="wrap-cloud">
+                    <div class="product-cloud-left" @click="closeProductCloud"></div>
                     <div class="open-cloud product-cloud">
                         <div class="team-cloud-header product-header">
-                            <el-carousel trigger="click" style="max-height: 300px; min-width: 400px" indicator-position="none" arrow="always" :autoplay="false">
+                            <el-carousel trigger="click" style="max-height: 400px; min-width: 500px" class="product-carousel" indicator-position="none" arrow="always" :autoplay="false">
                                 <el-carousel-item >
-                                    <img style="max-height: 300px;display: block;" :src="currentProduct.photo" /> 
+                                    <img style="max-height: 400px;display: block;;" :src="currentProduct.photo" /> 
                                 </el-carousel-item>
                                 <el-carousel-item v-for="item in currentProduct.extra" :key="item" v-if="currentProduct.extra[0]">
-                                    <img style="max-height: 300px;display: block;" :src="item" />                                    
+                                    <img style="max-height: 400px;display: block;" :src="item" />                                    
                                 </el-carousel-item>
                             </el-carousel>
-                        </div>
-                        <div class="cloud-store">
-                            <el-button icon="el-icon-goods" type="info" style="font-size: 20px;" round>To Cart</el-button>
                         </div>
                         <div class="cloud-story">
                             @{{ currentProduct.story }}
@@ -477,25 +582,91 @@
                             @{{ currentProduct.name }}
                         </div>
                         <div class="cloud-size">
-                            Select size and quantity: </br>
-                            <select>
-                                <option v-for="size in currentProduct.size" :value="size">@{{ size }}</option>                                
-                            </select>
-
-                            <select>
+                            <div class="cloud-select-box">
+                                <!--<select class="product-size cloud-select">
+                                    <option v-for="size in currentProduct.size" :value="size">@{{ size }}</option>                                
+                                </select>
+                                <div class="cloud-select-caret">
+                                    <i class="fa fa-caret-down " aria-hidden="true"></i>
+                                </div>-->
+                                <div class="btn-group">
+                                    <button type="button" class="btn btn-default cloud-select">@{{ selectedSize }}</button>
+                                    <button type="button" class="btn btn-default dropdown-toggle cloud-select-caret-box" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                                        <span class="caret cloud-select-caret"></span>
+                                        <span class="sr-only">Toggle Dropdown</span>
+                                    </button>
+                                    <ul class="dropdown-menu cloud-dropdown">
+                                        <li v-for="size in currentProduct.size" ><a @click="setSize(size)">@{{ size }}</a></li>
+                                    </ul>
+                                </div>
+                            </div>
+                            <!--<select class="product-quantity">
                                 <option v-for="n in 10" :value="n">@{{ n }}</option>                                
-                            </select>
+                            </select>-->
+                            <div class="btn-group">
+                                <button type="button" class="btn btn-default cloud-select">@{{ selectedQty }}</button>
+                                <button type="button" class="btn btn-default dropdown-toggle cloud-select-caret-box" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                                    <span class="caret cloud-select-caret"></span>
+                                    <span class="sr-only">Toggle Dropdown</span>
+                                </button>
+                                <ul class="dropdown-menu cloud-dropdown">
+                                    <li v-for="n in 10" ><a  @click="setQty(n)">@{{ n }}</a></li>
+                                </ul>
+                            </div>
+                            <div class="cloud-buy-wrapper">
+                                <div class="cloud-buy-btn" @click="addToCart(currentProduct)">snatch now!</div>
+                            </div>
                         </div>
                         <div class="cloud-close" @click="closeProductCloud">
-                            X
+                            <div class="cloud-close-btn">exit!</div>
                         </div>
                     </div>
+                    <div class="product-cloud-right" @click="closeProductCloud"></div>                    
+                    
                 </div>
                 <div id="youtube-video" v-if="openVideoIndicator">
                     <i class="fa fa-times " @click="openVideoIndicator = false"  aria-hidden="true"></i>                                                      
                     <iframe allowfullscreen webkitallowfullscreen mozallowfullscreen oallowfullscreen msallowfullscreen
                         :src="'https://www.youtube.com/embed/' + currentVideoCode">
                     </iframe>
+                </div>
+                <div class="shopping-wrapper">
+                    <div class="shopping-basket" >
+                        <div class="head" v-if="!basketOpen" @click="openBasket">
+                            <i class="fa fa-shopping-basket" aria-hidden="true"></i> (@{{ shoppingBasket.length }}) Basket
+                        </div>
+                        <div class="basket-content w-100" v-if="basketOpen" v-loading="loading">
+                            <i @click="hideBasket"  class="fa fa-arrow-right basket-hide" aria-hidden="true"></i>
+                            <h2 class="text-center">Basket</h2>
+                            <div class="side w-100">
+                                <div class="basket-mgmt" :key="key" v-for="(product, key) in shoppingBasket">
+                                    <i @click="removeProduct(key)" class="fa fa-times" aria-hidden="true"></i>
+                                    <h3>@{{ product.name }}</h3>
+                                    <select class="product-size">
+                                        <option v-for="size in product.size"  :selected="size == product.shopSize":value="size" >@{{ size }}</option>                                
+                                    </select>
+
+                                    <select class="product-quantity" @change="changeCount($event, key)">
+                                        <option v-for="n in 10" :selected="n == product.count" :value="n">@{{ n }}</option>                                
+                                    </select>
+                                    <div style="
+                                        width:  100%;
+                                        display: block;
+                                        position:  absolute;
+                                        bottom: 0;
+                                    ">Price: @{{ product.price }}</div>
+                                </div>
+                            </div>
+
+                            <h2 class="text-center total-price">Total Price: @{{ totalPrice.toFixed(2) }}</h2>
+
+                            <h2 @click="buyRequest" class="text-center buy-btn">Buy</h2>
+                        </div>
+                    </div>
+                    <div class="shopping-space" @click="hideBasket"></div>
+                </div>
+                <div class="zoom-mask" style="display:none" @click="zoomClose">
+                    <img :src="zoomImage" v-if="zoomImage != ''" />
                 </div>
             </div>
        </main-page>
@@ -511,7 +682,7 @@
             display: none !important;
         }
         .el-carousel__container {
-            height:300px !important;
+            height:400px !important;
         }
         .el-carousel__arrow {
             background-color: rgba(21, 128, 255, 0.53);

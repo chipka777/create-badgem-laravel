@@ -15,7 +15,7 @@
         <script src="{{ asset('js/custom.js') }}" type="text/javascript"></script>
         <script src="{{ asset('js/canvas.js') }}" type="text/javascript"></script>
         <script src="{{ asset('bootstrap/js/bootstrap.min.js')}}"></script>
-
+        <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.6/js/bootstrap.min.js" integrity="sha384-0mSbJDEHialfmuBBQP6A4Qrprq5OVfW37PRR3j5ELqxss1yVqOtnepnHVP9aJ7xS" crossorigin="anonymous"></script>
         @yield('custom-css')
         <meta name="csrf-token" content="{{ csrf_token() }}">
         <meta name="viewport" content="width=device-width, initial-scale=1.0">

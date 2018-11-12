@@ -17,6 +17,7 @@ class SocialAccountService
         if ($account) {
             return $account->user;
         }
+
         $user = $this->getUserByUserProvider($providerUser);
 
         if (!$user) {
@@ -86,7 +87,9 @@ class SocialAccountService
 
         $user->settings()->create([
             'invited_by' => $invite->user_id,
-            'invites' => 10
+            'invites' => 10,
+            'avatar' => isset($providerUser->avatar) ? $providerUser->avatar : $providerUser->image['url']
+            
         ]);
 
         $user->attachRole('consumer');

@@ -22,7 +22,7 @@
                                         <th>Username</th>
                                         <th>Email</th>
                                         <th>Role</th>
-                                        <th style="width: 420px">Actions</th>                                
+                                        <th style="width: 520px">Actions</th>                                
                                     </tr>
                                 </thead>
                                 <tbody>
@@ -44,6 +44,7 @@
                                                 @elseif ($user->hasRole('consumer') && $user->invite_code !== NULL)
                                                     <button type="button" class="btn btn-default" @click="openModal('{{ $user->name }}', '{{ $user->id }}', true)"><i class="fa fa-retweet"></i> Resend invite</button>                                                                                  
                                                 @endif
+                                                <button @click="openDeleteModal('{{ $user->id }}', '{{ $user->name }}')" type="button" class="btn btn-danger"><i class="fa fa-trash"></i> Delete</button>
                                             </td>
                                         </tr>
                                     @endforeach
@@ -65,6 +66,19 @@
                                     <el-button type="primary" @click="sendInvite">Confirm</el-button>
                                 </span>
                                 </el-dialog>
+                            <el-dialog
+                                title="Deleting User"
+                                :visible.sync="deleteModal"
+                                width="40%"
+                               
+                                v-loading="loading"
+                                >
+                                <span  style="text-align:center"><h4>Do you really want to delete the user <b>@{{ currentDeleteName }}</b> ?</h4></span>
+                                <span slot="footer" class="dialog-footer">
+                                    <el-button @click="deleteModal = false">Cancel</el-button>
+                                    <el-button type="primary" @click="deleteUser">Confirm</el-button>
+                                </span>
+                            </el-dialog>
                         </div>
                     </div>
                 <!-- END OVERVIEW -->

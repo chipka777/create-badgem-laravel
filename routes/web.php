@@ -15,7 +15,12 @@ Auth::routes();
 Route::get('login/{provider}', 'Auth\SocialLoginController@redirectToProvider');
 Route::get('login/{provider}/callback', 'Auth\SocialLoginController@handleProviderCallback');
 
-Route::get('cryptopayment/callback', 'Payments\PaymentController@handleCallback');
+Route::get('cryptopayment/callback', 'Payments\PaymentController@handleCallbackGet');
+Route::get('cryptopayment/callback1', 'Payments\PaymentController@handleCallbackGet1');
+Route::post('cryptopayment/callback', 'Payments\PaymentController@handleCallbackPost');
+Route::post('payment/test', 'Payments\PaymentController@testPayment');
+
+
 
 Route::post('/activate', 'Auth\\RegisterController@activate');
 
@@ -28,6 +33,7 @@ Route::group(['middleware' => 'auth'], function () {
 
 Route::group(['middleware' => 'role:administrator'], function() {
     Route::post('/user/send-invite', 'Admin\\UsersController@sendInvite'); 
+    Route::post('/user/delete', 'Admin\\UsersController@delete');     
 });
 
 /*Route::get('/test', 'API\Website\InstagramController@getImages');
@@ -38,6 +44,10 @@ Route::group(['prefix' => 'dashboard', 'namespace' => 'Admin', 'middleware' => '
     Route::get('/', 'DashboardController@index')->name('admin');
     Route::resource('categories', 'CategoriesController');
     Route::get('/images/all', 'ImagesController@showAll')->name('images.showAll');    
+    Route::get('/images/pending', 'ImagesController@showPending')->name('images.pending');  
+    Route::get('/images/get/pending/{category_id}/{count}/{offset}', 'ImagesController@getAllPending')->name('images.get-pending');
+    Route::get('/images/get/count/{category_id}', 'ImagesController@getPendingCount')->name('images.get-pending'); 
+    Route::get('/images/approve/{imageId}', 'ImagesController@approveImage')->name('images.get-pending');     
     Route::resource('images', 'ImagesController');
     Route::post('/images/{cat_id}', 'ImagesController@store');
     Route::get('/users', 'UsersController@index');
@@ -86,6 +96,8 @@ Route::group(['namespace' => 'API', 'prefix' => 'api/v1'], function() {
     });
 
     Route::group(['namespace' => 'Website'], function() {
+        Route::get('ticker', 'LDVController@getValues');
+
         Route::get('categories/all', 'CategoriesController@getAll');
         Route::get('categories', 'CategoriesController@getAllVisibility');
         Route::get('images/count/{category_id}', 'ImagesController@getCountByCategory');
@@ -107,7 +119,8 @@ Route::group(['namespace' => 'API', 'prefix' => 'api/v1'], function() {
         Route::get('team/{count}/{offset}', 'TeamController@getTeamMembers');        
         Route::get('goals/{count}/{offset}', 'GoalsController@getGoals');                
         Route::get('histories/{count}/{offset}', 'HistoryController@getHistoryByCount');                
-        Route::get('faq/{count}/{offset}', 'FAQController@getByCount');          
+        Route::get('faq/{count}/{offset}', 'FAQController@getByCount');     
+        Route::get('ldvHistory/{count}/{offset}', 'LDVController@getHistory');                       
         
         Route::get('products/all/{count}/{offset}', 'ProductsController@getAllByCount');        
         Route::get('products/{type}/{count}/{offset}', 'ProductsController@getProductsByTypeAndCount');
@@ -121,7 +134,15 @@ Route::group(['namespace' => 'API', 'prefix' => 'api/v1'], function() {
         Route::post('settings/bio', 'SettingsController@changeBio');   
         Route::post('settings/avatar', 'SettingsController@changeAvatar');     
 
-        Route::post('invite/send', 'InviteController@sendInvite');                     
+        Route::post('invite/send', 'InviteController@sendInvite');   
+
+        Route::post('shop/add-to-cart', 'BasketController@addToCart');  
+        Route::post('shop/remove-from-cart', 'BasketController@removeFromCart');     
+        Route::post('shop/update-product', 'BasketController@update');                           
+        Route::get('shop/get-product', 'BasketController@getProducts'); 
+        Route::get('shop/get-products-images', 'BasketController@getProductsImages');   
+
+        Route::get('instagram/all/{id}', 'InstagramController@getInfoById');   
     });
 });
 

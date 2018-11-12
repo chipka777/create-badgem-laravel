@@ -24,6 +24,7 @@ require('./components/Categories');
 require('./components/Images');
 require('./components/Images-show');
 require('./components/Images-favorite');
+require('./components/Images-pending');
 require('./components/Images-create');
 require('./components/Admin-users');
 require('./components/Admin-faq');
@@ -54,7 +55,7 @@ import * as VueGoogleMaps from 'vue2-google-maps'
  
 Vue.use(VueGoogleMaps, {
   load: {
-    key: 'AIzaSyCOSXw8E-sxYsWPuVWG2xmXx0U-Ay78ZOk',
+    key: 'AIzaSyCTaANMfGJlHU9scfI9iR0ayVC2KypwdRA',
     libraries: 'places', // This is required if you use the Autocomplete plugin
     // OR: libraries: 'places,drawing'
     // OR: libraries: 'places,drawing,visualization'
@@ -72,8 +73,8 @@ const app = new Vue({
     data: {
     },
     mounted: function() {
-        this.setActivity();
-        this.checkActivity();
+        //this.setActivity();
+        //this.checkActivity();
     },
     methods: {
         setActivity: function() {

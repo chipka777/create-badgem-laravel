@@ -1,4 +1,6 @@
 Vue.component('main-page', {
+    props: ['from'],
+    
     data: function () {
         return {
             images: [],
@@ -18,6 +20,7 @@ Vue.component('main-page', {
             insta: 0,
             itemsTmp: 0,
             stop: 0,
+            zoomImage: '',
             userInvites: 0,
             zoom: 17,
             center: {lat:33.782085,lng:-117.897881},
@@ -37,11 +40,23 @@ Vue.component('main-page', {
             nameEdit: false,    
             bioEdit: false,                                
             arrowEnable: true,
+            shoppingBasket: [],
             recEmail: '',
             inviteSend: false,
+            basketOpen: false,
             currentMenuSection: 'onlycenter',
             addRoute: '',
+            totalPrice: 0,
+            currentInstaImage: {
+                comments: []
+            },
+            ethAddress: '',
             additionalCurrentType: '',
+            selectedQty: 'qty',
+            selectedSize: 'size',   
+            btcValue: 0,
+            ethValue: 0,     
+            cloudStatus: 0,   
             cloudData: {
                 text: 'Bulletin',
                 title: 'Title',
@@ -92,6 +107,10 @@ Vue.component('main-page', {
                 videos: {
                     stop: false,
                     offset: 0,
+                },
+                ldvHistory: {
+                    stop: false,
+                    offset: 0,
                 }
             }
         }
@@ -105,7 +124,13 @@ Vue.component('main-page', {
         }
     },
     mounted: function() {
+        if (this.from == 'social') {
+            window.opener.location.reload(false);
+            window.close();
+        }
+        
         this.avatarPreview = $('.avatar-src').text();
+        this.getBasketProduct();
         this.getImages();
         this.getCategories();        
 
@@ -157,6 +182,31 @@ Vue.component('main-page', {
             });
         },
 
+        openLDV: function() {
+            this.loading = true;
+            this.$http.get('/api/v1/ticker').then(response => {
+                let eth,btc;
+
+                btc = (response.body.data[1].quotes.USD.price).toFixed(2);
+                eth = (response.body.data[1027].quotes.USD.price).toFixed(2);
+
+                if (response.body.data[1].quotes.USD.price > 1000) {
+                    btc = (response.body.data[1].quotes.USD.price / 1000).toFixed(3);
+                }
+
+                if (response.body.data[1027].quotes.USD.price > 1000) {
+                    eth = (response.body.data[1027].quotes.USD.price / 1000).toFixed(3);
+                }
+                this.btcValue = btc;
+                this.ethValue = eth;      
+            }, response => {
+                console.log('Some error with coinmarket api!');
+            });
+
+
+            this.bulletinLoad('ldvHistory', 50, false, 'ldv');
+        },
+ 
         setInstaToPanels: function(last, cat_id = 'all') {
             if (this.flag || this.sections[this.currentType].stop) return false;
 
@@ -407,7 +457,7 @@ Vue.component('main-page', {
             this.getImages();
         },
 
-        instagramLoad: function() {
+        instagramLoad: function(menu) {
             this.loading = true;
             this.hideToolTip();     
             
@@ -418,9 +468,9 @@ Vue.component('main-page', {
 
             this.$http.post('/api/v1/images/instagram', {max_id: this.sections.instagram.max_id, count: 50}).then(response => {
                 if (response.body.status === "OK") {
-                    this.showMenu = true;
+                    this.showMenu = menu;
                     this.arrowEnable = true;
-                    this.currentSection = 'instagram';
+                    this.currentSection = 'social';
                     this.currentType = 'instagram';
                     this.images = response.body.images.map(function (item) {
 						item.tmpName = item.name;
@@ -806,12 +856,26 @@ Vue.component('main-page', {
         },
 
         openProductCloud: function(key) {
-            this.currentProduct = this.products[key];
+            this.currentProduct = Object.assign({}, this.products[key]);
+            this.selectedSize = "size";
+            this.selectedQty = "qty";       
+            console.log(this.currentProduct);  
 
+
+            $('.product-quantity').val(1);
+        
             $("#product-cloud")
                 .css("display", "flex")
                 .hide()
                 .fadeIn(500);
+        },
+
+        setSize: function(size) {
+            this.selectedSize = size;
+        },
+
+        setQty: function(qty) {
+            this.selectedQty = qty;
         },
 
         openCloud: function(key) {
@@ -828,6 +892,35 @@ Vue.component('main-page', {
                 .css("display", "flex")
                 .hide()
                 .fadeIn(500);
+        },
+
+        openInstaModal: function(id, key) {
+            this.loading = true;
+            this.currentInstaImage.img = this.images[key].name;
+            this.currentInstaImage.carousel = this.images[key].carousel_media || false;
+            this.currentInstaImage.caption = this.images[key].caption;
+            
+            this.$http.get('/api/v1/instagram/all/' + id).then(response => {
+                this.currentInstaImage.comments = response.body.response.data;
+                this.loading = false;
+             }, response => {
+                this.loading = false;    
+
+                this.$notify.error({
+                    title: 'Error',
+                    message: 'Some error with instagram api',
+                    duration: 10000,
+                });
+             });
+
+            $("#insta-modal")
+                .css("display", "flex")
+                .hide()
+                .fadeIn(500);
+        },
+
+        closeInstaCloud: function() {
+            $("#insta-modal").hide();
         },
 
         openLocationCloud: function() {
@@ -862,6 +955,9 @@ Vue.component('main-page', {
         closeProductCloud: function () {
             $("#product-cloud")
             .fadeOut(500);
+
+            this.currentProduct.photo = '';
+            this.currentProduct.extra = '';            
         },
 
 
@@ -897,11 +993,16 @@ Vue.component('main-page', {
                     case 'instagram': 
                         //this.setInstaToPanels(last + 1, cat_id);
                         break;
+					case 'social':
+						if (this.currentType === 'videos') {
+							this.setImageToPanels(last + 1, cat_id);
+						}
+						break;
                 }
             } 
 
             if (last > 0) {
-                if (this.currentSection == 'images' || this.currentSection == 'instagram' || this.currentSection == 'videos') {
+                if (this.currentSection == 'images' || this.currentSection == 'instagram' || this.currentSection == 'social'  || this.currentSection == 'videos') {
                     ln = this.images.length;
                     images = this.images;
                     for(var i = 0; i < ln; i++) {
@@ -937,7 +1038,7 @@ Vue.component('main-page', {
         spiralLeft: function() {
             first = Number($('.panels div:first-child').attr('data-pos'));
             if (first < 1) {
-                if (this.currentSection == 'images' || this.currentSection == 'instagram' || this.currentSection == 'videos') {
+                if (this.currentSection == 'images' || this.currentSection == 'instagram' || this.currentSection == 'social' || this.currentSection == 'videos') {
                     ln = this.images.length;
                     images = this.images;
                     for(var i = 0; i < ln; i++) {
@@ -1055,9 +1156,6 @@ Vue.component('main-page', {
                     duration: 10000,
                 });
                 this.userInvites = response.body.invites;
-
-                console.log(response.body.invites);
-
             }, response => {
                 this.loading = false;
                 
@@ -1076,6 +1174,16 @@ Vue.component('main-page', {
                 }
             });
 
+        },
+
+        openPopup: function(target) {
+            $('.' + target).css('opacity', 1);
+        },
+
+        closePopup: function(target) {
+            setTimeout(function() {
+                $('.' + target).css('opacity', 0);
+            }, 300)
         },
 
         addToFavorited: function(id,key) {            
@@ -1104,6 +1212,192 @@ Vue.component('main-page', {
                     duration: 10000,
                 });
             });
+        },
+
+        openBasket: function() {
+            $('.shopping-basket').addClass('open-basket');
+            $('.shopping-space').addClass('open-basket');            
+            this.basketOpen = true;
+        },
+
+        hideBasket: function() {
+            $('.shopping-basket').removeClass('open-basket');
+            $('.shopping-space').removeClass('open-basket');            
+            this.basketOpen = false;
+        },
+
+        removeProduct: function(key) {
+            this.loading = true;
+            let self = this;
+
+            this.$http.post('/api/v1/shop/remove-from-cart', {id: this.shoppingBasket[key].id}).then(response => {
+                this.loading = false;
+
+                this.shoppingBasket.splice(key, 1);
+
+                if (this.shoppingBasket[0] !== undefined) {
+                    $('.shopping-basket').show();
+                } else {
+                    this.hideBasket();                 
+                }
+    
+                this.$notify.success({
+                    title: 'Success',
+                    message: 'This product was successfully removed from basket',
+                    duration: 1000,
+                });
+                self.totalPrice = 0;
+                
+                $.each(this.shoppingBasket, function(index, product) {
+                    self.totalPrice += product.count * product.price;
+                });
+                
+            }, response => {
+                this.loading = false;
+                
+                this.$notify.error({
+                    title: 'Error',
+                    message: 'Some error with shopping basket api',
+                    duration: 1000,
+                });
+            });
+        },
+
+        getBasketProduct: function() {
+            this.$http.get('/api/v1/shop/get-product').then(response => {
+                let self = this;
+
+                this.shoppingBasket = response.body.products || [];
+
+                if (this.shoppingBasket.length > 0) {
+                    $('.shopping-basket').show();
+                }
+                self.totalPrice = 0;
+
+                $.each(this.shoppingBasket, function(index, product) {
+                    self.totalPrice += product.count * product.price;
+                });
+            }, response => {
+                this.loading = false;
+                
+                this.$notify.error({
+                    title: 'Error',
+                    message: 'Some error with shopping basket api',
+                    duration: 1000,
+                });
+            });
+        },
+
+        changeCount: function(event, key) {
+            let self = this;
+            this.loading = true;            
+            this.shoppingBasket[key].count = $(event.target).val();
+            
+            this.$http.post('/api/v1/shop/update-product', {id: this.shoppingBasket[key].id, count: $(event.target).val()}).then(response => {
+                this.loading = false;
+
+                self.totalPrice = 0;
+                $.each(this.shoppingBasket, function(index, product) {
+                    self.totalPrice += product.count * product.price;
+                });
+
+                this.$notify.success({
+                    title: 'Success',
+                    message: 'This product was successfully updated',
+                    duration: 1000,
+                });
+            
+            }, response => {
+                this.loading = false;
+                
+                this.$notify.error({
+                    title: 'Error',
+                    message: 'Some error with shopping basket api',
+                    duration: 1000,
+                });
+            });
+        },
+
+        addToCart: function(productUpl) {
+            this.loading = true;      
+            let product = productUpl;      
+            product.count = this.selectedQty == 'qty' ? 1 : this.selectedQty;
+            product.shopSize = this.selectedSize;
+            let self = this;
+
+            this.$http.post('/api/v1/shop/add-to-cart', {data: product}).then(response => {
+                this.loading = false;
+
+                this.shoppingBasket.push(product);
+
+                if (this.shoppingBasket[0] !== undefined) {
+                    $('.shopping-basket').show();
+                }
+    
+                this.$notify.success({
+                    title: 'Success',
+                    message: 'This product was successfully added to basket',
+                    duration: 1000,
+                });
+
+                $("#product-cloud")
+                    .css("display", "flex")
+                    .fadeOut(500);
+
+                self.totalPrice = 0;
+                $.each(this.shoppingBasket, function(index, product) {
+                    self.totalPrice += product.count * product.price;
+                });
+                
+            }, response => {
+                this.loading = false;
+                
+                this.$notify.error({
+                    title: 'Error',
+                    message: 'Some error with shopping basket api',
+                    duration: 1000,
+                });
+            });
+        },
+
+        buyRequest: function() {
+            this.showMenu = false;
+            this.currentType = 'buy';
+
+            this.hideBasket();
+        },
+
+        setTransactionFields: function(event) {
+            event.preventDefault();            
+            this.loading = true;
+            
+            $('#transactionForm [name="amount"]').val(this.totalPrice * 100);
+
+            this.$http.get('/api/v1/shop/get-products-images').then(response => {
+                this.loading = true;
+                
+                $('#transactionForm [name="array_of_images"]').val(response.body.images);
+
+                $('#transactionForm').submit();
+            }, response => {
+                this.loading = false;
+
+                this.$notify.error({
+                    title: 'Error',
+                    message: 'Some error with basket api',
+                    duration: 10000,
+                });
+            });
+        },
+
+        zoomProduct: function(image) {
+            this.zoomImage = image;
+
+            $('.zoom-mask').show().css('display', 'flex');
+        },
+
+        zoomClose: function() {
+            $('.zoom-mask').hide();
         },
 
         removeFromFavorited: function(id,key) {

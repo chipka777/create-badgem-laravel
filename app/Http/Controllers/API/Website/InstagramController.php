@@ -4,6 +4,7 @@ namespace App\Http\Controllers\API\Website;
 
 use Illuminate\Http\Request;
 use App\Http\Controllers\Controller;
+use Illuminate\Support\Facades\Cache;
 
 class InstagramController extends Controller
 {
@@ -37,7 +38,7 @@ class InstagramController extends Controller
 
     private function getDataFromUrl($url)
     {
-        $ch = curl_init();
+        /*$ch = curl_init();
 
         curl_setopt($ch, CURLOPT_URL, $url);
         curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
@@ -45,8 +46,27 @@ class InstagramController extends Controller
 
         $response = curl_exec($ch);
 
-        curl_close($ch);
+        curl_close($ch);*/
 
-        var_dump($response);
+        $connection_c = curl_init();
+        curl_setopt( $connection_c, CURLOPT_URL, $url );
+        curl_setopt( $connection_c, CURLOPT_RETURNTRANSFER, 1 );
+        curl_setopt( $connection_c, CURLOPT_TIMEOUT, 20 );
+        $json_return = curl_exec( $connection_c );
+        curl_close( $connection_c );
+        return json_decode( $json_return );
+
+    }
+
+    public function getInfoById($id)
+    {
+        $response = Cache::remember('comments' . $id, 1440, function () use($id) {
+            return $this->getDataFromUrl("https://api.instagram.com/v1/media/$id/comments?access_token=3967824490.a1e1682.d3a638c2bea54b6aba5c6c3d607c7f89");;
+        });
+
+        return response()->json([
+            'response' => $response,
+            'status' => 'OK',
+        ]);
     }
 }

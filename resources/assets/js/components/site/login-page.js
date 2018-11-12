@@ -4,17 +4,16 @@ Vue.component('login-page', {
         return {
             currentSection: 'login',
             activeUser: this.user,
-            loading: false,
+            loading: true,
+            showPage: false,
             loginForm: {
                 email: '',
                 password: '',
                 remember: false,
             },
             registerForm: {
-                name: '',
-                first_name: '',
-                last_name: '',
                 email: '',
+                confirm_email: '',
                 password: '',
                 password_confirmation: '',
                 invite_code: ''
@@ -37,6 +36,13 @@ Vue.component('login-page', {
                 duration: 30000,
               });
         }
+
+        let self = this;
+
+        setTimeout(function() {
+            self.showPage = true;
+            self.loading = false;
+        }, 2000);
     },
     methods: {
         login: function(form) {
@@ -82,10 +88,8 @@ Vue.component('login-page', {
 
             var data = new FormData();
 
-            data.append('name', this.registerForm.name);
-            data.append('first_name', this.registerForm.first_name);
-            data.append('last_name', this.registerForm.last_name);
             data.append('email', this.registerForm.email);
+            data.append('email_confirmation', this.registerForm.confirm_email);            
             data.append('password', this.registerForm.password);
             data.append('password_confirmation', this.registerForm.password_confirmation);
             data.append('invite_code', this.registerForm.invite_code);            
@@ -122,6 +126,14 @@ Vue.component('login-page', {
             });
         },
 
+        openWindow: function(url) {
+            let width = window.innerWidth / 3;
+            let height = window.innerHeight / 2;            
+            let left = window.innerWidth / 2 - (width / 2);
+            let top = window.innerHeight / 2 - (height / 2);
+
+            window.open(url,'name','width=' + width + ',height=' + height + ',top=' + top + ',left=' + left);
+        },
         activate: function() {
             this.loading = true;
 

@@ -46,6 +46,6 @@ class SocialLoginController extends Controller
 
         auth()->login($authUser, true);
 
-        return redirect()->to('/');
+        return redirect()->to('/')->with('from', 'social');
     }
 }

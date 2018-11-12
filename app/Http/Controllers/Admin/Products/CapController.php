@@ -223,7 +223,7 @@ class CapController extends Controller
         }
         
 
-        exec("convert clouds/cloud.png " . $this::TMP_DIR . "$name -gravity center -composite clouds/cloud.png -compose copyopacity -composite " . $this::PUBLIC_WCLOUD_DIR . "$name");
+        exec("convert clouds/cloud.png " . $this::TMP_DIR . "$name -gravity center -geometry +0+10 -composite clouds/cloud.png -compose copyopacity -composite " . $this::PUBLIC_WCLOUD_DIR . "$name");
         exec("convert clouds/cloud-frame.png " . $this::PUBLIC_WCLOUD_DIR . "$name -geometry +30+10 -composite " . $this::PUBLIC_WCLOUD_DIR . "$name");
 
         exec("rm " . $this::TMP_DIR . "/$name");

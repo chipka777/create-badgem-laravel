@@ -75,6 +75,7 @@ class ImagesController extends Controller
                 where(function($query) use ($category_id) {
                     if ($category_id != 'all') $query->where('cat_id', $category_id);
                 })
+                ->where('approved', 1)
                 ->orderBy('id', 'desc')
                 ->offset($offset)
                 ->limit($count)
@@ -140,6 +141,7 @@ class ImagesController extends Controller
         $query = Auth::user()->favoriteImages();
 
         $images = $query->orderBy('id', 'desc')
+            ->where('approved', 1)
             ->offset($offset)
             ->limit($count)
             ->get()
@@ -267,6 +269,8 @@ class ImagesController extends Controller
             $entry->num = $key + 1;
             $entry->insta = 1;
             $entry->name = $post->images->standard_resolution->url;
+            $entry->caption = $post->caption;
+            $entry->carousel_media = isset($post->carousel_media) ? $post->carousel_media : null;
 
             $data[] = $entry;
             /*

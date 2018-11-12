@@ -10,6 +10,12 @@ class Image extends Model
 {
     protected $table = 'images';
 
+    protected $fillable = [
+        'name', 'user_id', 'cat_id',
+        'tags', 'title', 'approved',
+        'favorited'
+    ];
+
     public function checkIfFavorited()
     {
         if (Auth::guest()) return false;

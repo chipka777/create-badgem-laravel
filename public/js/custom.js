@@ -28,6 +28,7 @@ $(document).ready(function () {
 		$("#file-modal-search").removeClass('active');
 	});
 	
+	$('#app').show();
 	
 });
 var prev_elem = 'menu-text';

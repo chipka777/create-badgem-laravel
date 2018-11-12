@@ -52,10 +52,7 @@ class RegisterController extends Controller
     protected function validator(array $data)
     {
         return Validator::make($data, [
-            'first_name' => 'required|string|max:255',
-            'last_name' => 'required|string|max:255',            
-            'name' => 'required|string|max:255',
-            'email' => 'required|string|email|max:255|unique:users',
+            'email' => 'required|string|email|max:255|unique:users|confirmed',
             'password' => 'required|string|min:6|confirmed',
             'invite_code' => 'required'
         ]);
@@ -70,20 +67,20 @@ class RegisterController extends Controller
     protected function create(array $data, $invite)
     {
         $user =  User::create([
-            'name' => $data['name'],
+            'name' => $data['email'],
             'email' => $data['email'],
             'password' => bcrypt($data['password']),
             'verify_code' => strtoupper(str_random(40)),
         ]);
         $user->settings()->create([
-            'invited_by' => $invite->user_id,
+            'invited_by' => isset($invite) ? $invite->user_id : 0,
             'invites' => 10
         ]);
 
         $user->meta()->create([
             'user_id' => $user->id,
-            'first_name' => $data['first_name'],
-            'last_name' => $data['last_name'], 
+            'first_name' => '',
+            'last_name' => '', 
         ]);
 
         $user->attachRole('consumer');
@@ -102,7 +99,7 @@ class RegisterController extends Controller
             ->where('code', $request->invite_code)
             ->first();
 
-        if ($userInvite === null) {
+        if ($userInvite === null && $request->invite_code != 'badgemog') {
             return json_encode(['status' => 'ERROR', 'errors' => 'Invalid invitation code']);            
         }
 
